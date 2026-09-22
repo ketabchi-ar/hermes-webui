@@ -27997,10 +27997,18 @@ function setLocale(lang) {
   document.documentElement.lang = _locale._speech || resolved;
   if (typeof document.documentElement.setAttribute === 'function') {
     document.documentElement.setAttribute('data-locale', resolved);
+  }
+  if (document.documentElement.classList) {
     if (resolved === 'fa') {
-      document.documentElement.setAttribute('dir', 'rtl');
-    } else if (typeof document.documentElement.removeAttribute === 'function') {
-      document.documentElement.removeAttribute('dir');
+      document.documentElement.classList.add('chat-content-rtl');
+    } else {
+      try {
+        const raw = localStorage.getItem('hermes-settings');
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (!parsed || !parsed.rtl) {
+          document.documentElement.classList.remove('chat-content-rtl');
+        }
+      } catch (_) {}
     }
   }
 }

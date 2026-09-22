@@ -11,6 +11,7 @@ def test_fa_locale_structure_and_rtl():
     const vm = require('vm');
     const src = fs.readFileSync(process.argv[1], 'utf8');
     const storage = {};
+    const classes = new Set();
     const ctx = {
       localStorage: {
         getItem: (k) => storage[k] || null,
@@ -19,6 +20,11 @@ def test_fa_locale_structure_and_rtl():
       document: {
         documentElement: {
           lang: '',
+          classList: {
+            add: (c) => classes.add(c),
+            remove: (c) => classes.delete(c),
+            contains: (c) => classes.has(c),
+          },
           setAttribute: function(k, v) { this[k] = v; },
           removeAttribute: function(k) { delete this[k]; }
         },
@@ -30,12 +36,12 @@ def test_fa_locale_structure_and_rtl():
     const resolved = vm.runInContext("resolveLocale('fa')", ctx);
     const faBundle = vm.runInContext("LOCALES.fa", ctx);
     vm.runInContext("setLocale('fa')", ctx);
-    const dir = ctx.document.documentElement.dir;
+    const hasRtlClass = classes.has('chat-content-rtl');
     const lang = ctx.document.documentElement.lang;
     process.stdout.write(JSON.stringify({
       resolved,
       label: faBundle._label,
-      dir,
+      hasRtlClass,
       lang,
       settings_tab_preferences: faBundle.settings_tab_preferences,
       settings_label_rtl: faBundle.settings_label_rtl
@@ -45,7 +51,7 @@ def test_fa_locale_structure_and_rtl():
     res = json.loads(proc.stdout)
     assert res["resolved"] == "fa"
     assert res["label"] == "فارسی"
-    assert res["dir"] == "rtl"
+    assert res["hasRtlClass"] is True
     assert res["lang"] == "fa-IR"
     assert res["settings_tab_preferences"] == "ترجیحات"
     assert res["settings_label_rtl"] == "چیدمان راست‌به‌چپ چت"
