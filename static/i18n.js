@@ -28357,6 +28357,9 @@ const LOCALES = {
     plugins_search_placeholder: 'جستجوی افزونه‌ها...',
     settings_help_title: 'راهنما و منابع',
     settings_help_desc: 'دسترسی به اسناد رسمی، گزارش مشکلات و انجمن هرمس.',
+    sessions_source_webui: 'وب‌یوآی',
+    sessions_source_cli: 'ترمینال / CLI',
+    settings_extensions_meta: 'اکستنشن‌های رابط کاربری و افزونه‌های وب‌یوآی.',
   },
 
 };
