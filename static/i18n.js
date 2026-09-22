@@ -28003,9 +28003,8 @@ function setLocale(lang) {
       document.documentElement.classList.add('chat-content-rtl');
     } else {
       try {
-        const raw = localStorage.getItem('hermes-settings');
-        const parsed = raw ? JSON.parse(raw) : null;
-        if (!parsed || !parsed.rtl) {
+        const rtlEnabled = localStorage.getItem('hermes-rtl') === 'true';
+        if (!rtlEnabled) {
           document.documentElement.classList.remove('chat-content-rtl');
         }
       } catch (_) {}
