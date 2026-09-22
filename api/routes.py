@@ -11016,6 +11016,15 @@ _LOGIN_LOCALE = {
         "invalid_pw": "Neplatn\u00e9 heslo",
         "conn_failed": "P\u0159ipojen\u00ed selhalo",
     },
+    "fa": {
+        "lang": "fa-IR",
+        "title": "ورود",
+        "subtitle": "برای ادامه رمز عبور خود را وارد کنید",
+        "placeholder": "رمز عبور",
+        "btn": "ورود",
+        "invalid_pw": "رمز عبور نامعتبر است",
+        "conn_failed": "اتصال برقرار نشد",
+    },
 }
 
 
