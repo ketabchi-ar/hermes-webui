@@ -9551,11 +9551,11 @@ async function loadSettingsPanel(){
     const rtlCb=$('settingsRtl');
     if(rtlCb){
       const currentLocale = (typeof _locale !== 'undefined' && _locale && _locale._lang) || (typeof resolvePreferredLocale === 'function' ? resolvePreferredLocale() : localStorage.getItem('hermes-lang'));
-      const isFaDefault = currentLocale === 'fa';
+      const isFaLocale = currentLocale === 'fa';
       const storedRtl = localStorage.getItem('hermes-rtl');
-      const saved = (settings && typeof settings.rtl === 'boolean')
-        ? settings.rtl
-        : (storedRtl !== null ? storedRtl === 'true' : isFaDefault);
+      const saved = (storedRtl !== null)
+        ? storedRtl === 'true'
+        : (Boolean(settings && settings.rtl) || isFaLocale);
       rtlCb.checked = saved;
       try{localStorage.setItem('hermes-rtl', saved ? 'true' : 'false');}catch(_){}
       document.documentElement.classList.toggle('chat-content-rtl', saved);
