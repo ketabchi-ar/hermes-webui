@@ -85,9 +85,9 @@ def test_opening_settings_preserves_persian_auto_rtl():
     """Item 5 regression: Opening settings panel must not revert automatic RTL for Persian users."""
     panels_src = (ROOT / "static" / "panels.js").read_text(encoding="utf-8")
     assert "const isFaLocale = currentLocale === 'fa';" in panels_src
-    # Stored client RTL choice wins over server default false, and fa defaults to true
-    assert "saved = (storedRtl !== null)" in panels_src
-    assert "(Boolean(settings && settings.rtl) || isFaLocale)" in panels_src
+    # Server true or client true or Persian locale defaults to true
+    assert "if (settings && settings.rtl === true)" in panels_src
+    assert "saved = isFaLocale;" in panels_src
 
 
 def test_vazirmatn_font_license_exists():

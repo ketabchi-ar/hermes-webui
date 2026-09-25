@@ -9553,9 +9553,14 @@ async function loadSettingsPanel(){
       const currentLocale = (typeof _locale !== 'undefined' && _locale && _locale._lang) || (typeof resolvePreferredLocale === 'function' ? resolvePreferredLocale() : localStorage.getItem('hermes-lang'));
       const isFaLocale = currentLocale === 'fa';
       const storedRtl = localStorage.getItem('hermes-rtl');
-      const saved = (storedRtl !== null)
-        ? storedRtl === 'true'
-        : (Boolean(settings && settings.rtl) || isFaLocale);
+      let saved;
+      if (settings && settings.rtl === true) {
+        saved = true;
+      } else if (storedRtl !== null) {
+        saved = storedRtl === 'true';
+      } else {
+        saved = isFaLocale;
+      }
       rtlCb.checked = saved;
       try{localStorage.setItem('hermes-rtl', saved ? 'true' : 'false');}catch(_){}
       document.documentElement.classList.toggle('chat-content-rtl', saved);
