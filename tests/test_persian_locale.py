@@ -55,3 +55,44 @@ def test_fa_locale_structure_and_rtl():
     assert res["lang"] == "fa-IR"
     assert res["settings_tab_preferences"] == "ترجیحات"
     assert res["settings_label_rtl"] == "چیدمان راست‌به‌چپ چت"
+
+
+def test_sessions_source_placeholders_preserved():
+    """Item 4 regression: sessions_source_webui and sessions_source_cli must contain {0} count placeholder."""
+    script = """
+    const fs = require('fs');
+    const vm = require('vm');
+    const src = fs.readFileSync(process.argv[1], 'utf8');
+    const ctx = {
+      localStorage: { getItem: () => null, setItem: () => {} },
+      document: { documentElement: { lang: '' }, querySelectorAll: () => [] }
+    };
+    vm.createContext(ctx);
+    vm.runInContext(src, ctx);
+    const fa = vm.runInContext("LOCALES.fa", ctx);
+    process.stdout.write(JSON.stringify({
+      webui: fa.sessions_source_webui,
+      cli: fa.sessions_source_cli
+    }));
+    """
+    proc = subprocess.run(["node", "-e", script, str(I18N)], check=True, capture_output=True, text=True)
+    res = json.loads(proc.stdout)
+    assert "{0}" in res["webui"], f"Expected {0} placeholder in sessions_source_webui, got: {res['webui']}"
+    assert "{0}" in res["cli"], f"Expected {0} placeholder in sessions_source_cli, got: {res['cli']}"
+
+
+def test_opening_settings_preserves_persian_auto_rtl():
+    """Item 5 regression: Opening settings panel must not revert automatic RTL for Persian users."""
+    panels_src = (ROOT / "static" / "panels.js").read_text(encoding="utf-8")
+    assert "const isFaDefault = currentLocale === 'fa';" in panels_src or "isFaDefault" in panels_src
+    # Structural check on panels.js fallback logic
+    assert "storedRtl !== null ? storedRtl === 'true' : isFaDefault" in panels_src
+
+
+def test_vazirmatn_font_license_exists():
+    """Item 6: SIL Open Font License must accompany the Vazirmatn font files in static/fonts/."""
+    ofl = ROOT / "static" / "fonts" / "OFL.txt"
+    assert ofl.exists(), "static/fonts/OFL.txt is missing"
+    content = ofl.read_text(encoding="utf-8")
+    assert "Saber Rastikerdar" in content
+    assert "SIL OPEN FONT LICENSE" in content
