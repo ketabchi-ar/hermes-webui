@@ -9554,15 +9554,14 @@ async function loadSettingsPanel(){
       const isFaLocale = currentLocale === 'fa';
       const storedRtl = localStorage.getItem('hermes-rtl');
       let saved;
-      if (settings && settings.rtl === true) {
-        saved = true;
-      } else if (storedRtl !== null) {
+      if (storedRtl !== null) {
         saved = storedRtl === 'true';
+      } else if (settings && typeof settings.rtl === 'boolean') {
+        saved = settings.rtl;
       } else {
         saved = isFaLocale;
       }
       rtlCb.checked = saved;
-      try{localStorage.setItem('hermes-rtl', saved ? 'true' : 'false');}catch(_){}
       document.documentElement.classList.toggle('chat-content-rtl', saved);
       rtlCb.addEventListener('change',()=>{
         const on = rtlCb.checked;
