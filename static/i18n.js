@@ -27156,7 +27156,7 @@ const LOCALES = {
     share_session: "اشتراک‌گذاری",
     share_session_tooltip: 'ایجاد پیوند اشتراک‌گذاری عمومی و فقط‌خواندنی',
     share_session_status_active: 'اشتراک‌گذاری عمومی فعال است',
-    share_session_existing_confirm: 'این گفتگو در حال حاضر دارای پیوند عمومی فعال است. پیوند جدید جایگزین پیوند قبلی خواهد شد.',
+    share_session_existing_confirm: 'این گفتگو در حال حاضر دارای پیوند عمومی فعال است. برای استفاده دوباره از همان پیوند، «کپی پیوند موجود» را انتخاب کنید؛ «بروزرسانی رونوشت» محتوای همین پیوند را با پیام‌های جدید به‌روز می‌کند.',
     share_session_copy_existing: 'کپی پیوند موجود',
     share_session_refresh_snapshot: 'بروزرسانی رونوشت',
     share_session_link_copied: 'پیوند اشتراک‌گذاری در کلیپ‌بورد کپی شد',
@@ -28806,22 +28806,20 @@ function setLocale(lang) {
   }
   if (document.documentElement.classList) {
     try {
-      const rtlMode = (typeof window !== 'undefined' && window._rtlMode) || localStorage.getItem('hermes-rtl-mode');
-      if (rtlMode === 'on') {
+      const localMode = localStorage.getItem('hermes-rtl-mode');
+      const serverMode = (typeof window !== 'undefined' && window._serverRtlMode);
+      const effectiveMode = (localMode && ['auto','on','off'].includes(localMode))
+        ? localMode
+        : (serverMode && ['auto','on','off'].includes(serverMode) ? serverMode : ((typeof window !== 'undefined' && window._rtlMode) || 'auto'));
+      if (effectiveMode === 'on') {
         document.documentElement.classList.add('chat-content-rtl');
-      } else if (rtlMode === 'off') {
+      } else if (effectiveMode === 'off') {
         document.documentElement.classList.remove('chat-content-rtl');
-      } else if (rtlMode === 'auto') {
-        if (resolved === 'fa') {
-          document.documentElement.classList.add('chat-content-rtl');
-        } else {
-          document.documentElement.classList.remove('chat-content-rtl');
-        }
       } else {
-        // Fallback for legacy localStorage['hermes-rtl']
-        const explicitRtl = localStorage.getItem('hermes-rtl');
-        if (explicitRtl !== null) {
-          if (explicitRtl === 'true') {
+        // 'auto' mode or legacy fallback
+        const legacyRtl = localStorage.getItem('hermes-rtl');
+        if (legacyRtl !== null && !localMode && !serverMode) {
+          if (legacyRtl === 'true') {
             document.documentElement.classList.add('chat-content-rtl');
           } else {
             document.documentElement.classList.remove('chat-content-rtl');

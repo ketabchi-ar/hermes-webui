@@ -9572,10 +9572,9 @@ async function loadSettingsPanel(){
         effectiveMode = 'auto';
       }
       window._rtlMode = effectiveMode;
-      try{localStorage.setItem('hermes-rtl-mode', effectiveMode);}catch(_){}
+      if (settings && typeof settings.rtl_mode === 'string') window._serverRtlMode = settings.rtl_mode;
       const saved = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);
       rtlCb.checked = saved;
-      try{localStorage.setItem('hermes-rtl', saved ? 'true' : 'false');}catch(_){}
       document.documentElement.classList.toggle('chat-content-rtl', saved);
       rtlCb.addEventListener('change',()=>{
         const on = rtlCb.checked;

@@ -387,21 +387,17 @@ def test_composed_hydration_language_payload_coherence():
     }
     const endsOffInEn = !m1.classes.has('chat-content-rtl') && !m1.elements['settingsRtl'].checked;
 
-    // Matrix Case 2: Manual off saved, fresh browser -> stays off
+    // Matrix Case 2: Manual off saved, fresh browser -> boot -> stays off
     const m2 = createSandbox({});
     const settingsM2 = { rtl: false, rtl_mode: 'off', language: 'fa' };
-    const modeM2 = settingsM2.rtl_mode;
-    m2.ctx.window._rtlMode = modeM2;
-    const savedM2 = modeM2 === 'on' ? true : (modeM2 === 'off' ? false : true);
-    m2.elements['settingsRtl'].checked = savedM2;
-    m2.ctx.document.documentElement.classList.toggle('chat-content-rtl', savedM2);
+    m2.ctx.window._serverRtlMode = settingsM2.rtl_mode;
     m2.ctx.setLocale('fa');
-    const manualOffStaysOff = !savedM2 && !m2.classes.has('chat-content-rtl');
+    const manualOffStaysOff = !m2.classes.has('chat-content-rtl');
 
     // Matrix Case 3: Manual on saved, fresh browser (including boot)
     const m3 = createSandbox({});
     const settingsM3 = { rtl: true, rtl_mode: 'on', language: 'en' };
-    m3.ctx.window._rtlMode = settingsM3.rtl_mode;
+    m3.ctx.window._serverRtlMode = settingsM3.rtl_mode;
     m3.ctx.setLocale('en');
     const manualOnStaysOn = m3.classes.has('chat-content-rtl');
 

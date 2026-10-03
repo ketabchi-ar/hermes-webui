@@ -3430,6 +3430,9 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
     const fontSize=(s.font_size||localStorage.getItem('hermes-font-size')||'default');
     localStorage.setItem('hermes-font-size',fontSize);
     _applyFontSize(fontSize);
+    if(s && typeof s.rtl_mode === 'string' && ['auto','on','off'].includes(s.rtl_mode)){
+      window._serverRtlMode = s.rtl_mode;
+    }
     if(typeof setLocale==='function'){
       const _lang=typeof resolvePreferredLocale==='function'
         ? resolvePreferredLocale(s.language, localStorage.getItem('hermes-lang'))
