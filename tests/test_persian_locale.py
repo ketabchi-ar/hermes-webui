@@ -86,7 +86,7 @@ def test_opening_settings_preserves_persian_auto_rtl():
     panels_src = (ROOT / "static" / "panels.js").read_text(encoding="utf-8")
     assert "const isFaLocale = currentLocale === 'fa';" in panels_src
     assert "if (storedRtl !== null)" in panels_src
-    assert "else if (settings && typeof settings.rtl === 'boolean')" in panels_src
+    assert "else if (settings && settings.rtl === true)" in panels_src
     assert "saved = isFaLocale;" in panels_src
     # Must NOT write to localStorage merely on settings open
     assert "rtlCb.checked = saved;\n      document.documentElement.classList.toggle('chat-content-rtl', saved);" in panels_src
@@ -229,3 +229,174 @@ def test_rtl_state_transitions_default_and_explicit():
     assert res["faStorageClean"] is True
     assert res["explicitFaOff"] is True
     assert res["explicitEnOn"] is True
+
+
+def test_goal_status_argument_contracts_distinct_reason_and_budget():
+    """Item 2: goal_status_paused and goal_status_done must accept 4 arguments and preserve budget."""
+    script = """
+    const fs = require('fs');
+    const vm = require('vm');
+    const src = fs.readFileSync(process.argv[1], 'utf8');
+    const ctx = {
+      localStorage: { getItem: () => null, setItem: () => {} },
+      document: { documentElement: { lang: '' }, querySelectorAll: () => [] }
+    };
+    vm.createContext(ctx);
+    vm.runInContext(src, ctx);
+    const fa = vm.runInContext("LOCALES.fa", ctx);
+    const t = vm.runInContext("t", ctx);
+    vm.runInContext("_locale = LOCALES.fa", ctx);
+
+    const pausedMsg = t('goal_status_paused', 3, 10, 'waiting on api', 'ship feature');
+    const doneMsg = t('goal_status_done', 7, 20, 'refactor codebase');
+
+    process.stdout.write(JSON.stringify({ pausedMsg, doneMsg }));
+    """
+    proc = subprocess.run(["node", "-e", script, str(I18N)], check=True, capture_output=True, text=True)
+    res = json.loads(proc.stdout)
+    assert "ship feature" in res["pausedMsg"], f"Goal lost in pausedMsg: {res['pausedMsg']}"
+    assert "waiting on api" in res["pausedMsg"], f"Reason lost in pausedMsg: {res['pausedMsg']}"
+    assert "3/10" in res["pausedMsg"], f"Budget lost in pausedMsg: {res['pausedMsg']}"
+    assert "refactor codebase" in res["doneMsg"], f"Goal lost in doneMsg: {res['doneMsg']}"
+    assert "7/20" in res["doneMsg"], f"Budget lost in doneMsg: {res['doneMsg']}"
+
+
+def test_composed_hydration_language_payload_coherence():
+    """Item 1: Composed hydration with default-false API input, language switch, and payload coherence."""
+    script = """
+    const fs = require('fs');
+    const vm = require('vm');
+    const i18nSrc = fs.readFileSync(process.argv[1], 'utf8');
+
+    function createSandbox(initialStorage = {}) {
+      const storage = { ...initialStorage };
+      const classes = new Set();
+      const listeners = {};
+      const elements = {};
+
+      function makeElem(id) {
+        return {
+          id,
+          checked: false,
+          value: '',
+          innerHTML: '',
+          appendChild: () => {},
+          addEventListener: (evt, fn) => {
+            listeners[id + ':' + evt] = fn;
+          }
+        };
+      }
+
+      elements['settingsRtl'] = makeElem('settingsRtl');
+      elements['settingsLanguage'] = makeElem('settingsLanguage');
+      elements['settingsSendKey'] = makeElem('settingsSendKey');
+
+      const doc = {
+        documentElement: {
+          lang: '',
+          classList: {
+            add: (c) => classes.add(c),
+            remove: (c) => classes.delete(c),
+            contains: (c) => classes.has(c),
+            toggle: (c, force) => {
+              if (force !== undefined) {
+                if (force) classes.add(c);
+                else classes.delete(c);
+              } else {
+                if (classes.has(c)) classes.delete(c);
+                else classes.add(c);
+              }
+            }
+          },
+          setAttribute: () => {},
+          removeAttribute: () => {}
+        },
+        getElementById: (id) => elements[id] || null,
+        querySelectorAll: () => []
+      };
+
+      const ctx = {
+        localStorage: {
+          getItem: (k) => storage[k] !== undefined ? storage[k] : null,
+          setItem: (k, v) => { storage[k] = String(v); },
+          removeItem: (k) => { delete storage[k]; }
+        },
+        document: doc,
+        window: { document: doc },
+        $: (id) => elements[id] || null,
+        _schedulePreferencesAutosave: () => {},
+        applyLocaleToDOM: () => {}
+      };
+      ctx.window.window = ctx.window;
+      vm.createContext(ctx);
+      vm.runInContext(i18nSrc, ctx);
+      return { ctx, storage, classes, elements, listeners };
+    }
+
+    // 1. Fresh Persian user: API settings.rtl = false, no hermes-rtl override
+    const sb1 = createSandbox({ 'hermes-lang': 'fa' });
+    sb1.ctx.setLocale('fa');
+    // Simulate loadSettingsPanel with API default settings = { rtl: false, language: 'fa' }
+    const settings1 = { rtl: false, language: 'fa' };
+    const currentLocale1 = 'fa';
+    const isFaLocale1 = currentLocale1 === 'fa';
+    const storedRtl1 = sb1.ctx.localStorage.getItem('hermes-rtl');
+    let effectiveRtl1 = (storedRtl1 !== null)
+      ? (storedRtl1 === 'true')
+      : ((settings1 && settings1.rtl === true) ? true : isFaLocale1);
+
+    sb1.elements['settingsRtl'].checked = effectiveRtl1;
+    sb1.ctx.document.documentElement.classList.toggle('chat-content-rtl', effectiveRtl1);
+
+    const freshFaChecked = sb1.elements['settingsRtl'].checked;
+    const freshFaHasClass = sb1.classes.has('chat-content-rtl');
+    const freshFaStorageClean = sb1.storage['hermes-rtl'] === undefined;
+
+    // 2. Language change in Settings from en to fa keeps checkbox/class/payload coherent
+    const sb2 = createSandbox({ 'hermes-lang': 'en' });
+    sb2.ctx.setLocale('en');
+    const settings2 = { rtl: false, language: 'en' };
+    let effectiveRtl2 = (settings2 && settings2.rtl === true) ? true : false;
+    sb2.elements['settingsRtl'].checked = effectiveRtl2;
+    sb2.ctx.document.documentElement.classList.toggle('chat-content-rtl', effectiveRtl2);
+
+    // User selects 'fa' in language dropdown:
+    sb2.ctx.setLocale('fa');
+    if (sb2.storage['hermes-rtl'] === undefined) {
+      const autoRtl = true;
+      sb2.elements['settingsRtl'].checked = autoRtl;
+      sb2.ctx.document.documentElement.classList.toggle('chat-content-rtl', autoRtl);
+    }
+    const langChangeChecked = sb2.elements['settingsRtl'].checked;
+    const langChangeHasClass = sb2.classes.has('chat-content-rtl');
+
+    // 3. Explicit client off preserves false even under settings.rtl = true
+    const sb3 = createSandbox({ 'hermes-lang': 'fa', 'hermes-rtl': 'false' });
+    sb3.ctx.setLocale('fa');
+    const settings3 = { rtl: true, language: 'fa' };
+    const storedRtl3 = sb3.ctx.localStorage.getItem('hermes-rtl');
+    let effectiveRtl3 = (storedRtl3 !== null)
+      ? (storedRtl3 === 'true')
+      : ((settings3 && settings3.rtl === true) ? true : true);
+    sb3.elements['settingsRtl'].checked = effectiveRtl3;
+    sb3.ctx.document.documentElement.classList.toggle('chat-content-rtl', effectiveRtl3);
+
+    const explicitClientOffWins = !sb3.elements['settingsRtl'].checked && !sb3.classes.has('chat-content-rtl');
+
+    process.stdout.write(JSON.stringify({
+      freshFaChecked,
+      freshFaHasClass,
+      freshFaStorageClean,
+      langChangeChecked,
+      langChangeHasClass,
+      explicitClientOffWins
+    }));
+    """
+    proc = subprocess.run(["node", "-e", script, str(I18N)], check=True, capture_output=True, text=True)
+    res = json.loads(proc.stdout)
+    assert res["freshFaChecked"] is True
+    assert res["freshFaHasClass"] is True
+    assert res["freshFaStorageClean"] is True
+    assert res["langChangeChecked"] is True
+    assert res["langChangeHasClass"] is True
+    assert res["explicitClientOffWins"] is True

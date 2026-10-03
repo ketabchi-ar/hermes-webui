@@ -9377,6 +9377,12 @@ async function loadSettingsPanel(){
       langSel.value=resolvedLanguage;
       langSel.addEventListener('change',function(){
         if(typeof setLocale==='function'){setLocale(this.value);if(typeof applyLocaleToDOM==='function')applyLocaleToDOM();}
+        const rtlBox = $('settingsRtl');
+        if (rtlBox && localStorage.getItem('hermes-rtl') === null && window._serverRtl !== true) {
+          const autoRtl = this.value === 'fa';
+          rtlBox.checked = autoRtl;
+          document.documentElement.classList.toggle('chat-content-rtl', autoRtl);
+        }
         _schedulePreferencesAutosave();
       },{once:false});
     }
@@ -9556,8 +9562,8 @@ async function loadSettingsPanel(){
       let saved;
       if (storedRtl !== null) {
         saved = storedRtl === 'true';
-      } else if (settings && typeof settings.rtl === 'boolean') {
-        saved = settings.rtl;
+      } else if (settings && settings.rtl === true) {
+        saved = true;
       } else {
         saved = isFaLocale;
       }
@@ -9570,6 +9576,7 @@ async function loadSettingsPanel(){
         _schedulePreferencesAutosave();
       },{once:false});
     }
+    if (settings && typeof settings.rtl === 'boolean') window._serverRtl = settings.rtl;
     if(typeof window._mirrorSpeechSettingsFromServer==='function') window._mirrorSpeechSettingsFromServer(settings);
     const persistedSpeechKeys = new Set(
       Array.isArray(settings && settings.persisted_speech_keys)

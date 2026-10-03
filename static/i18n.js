@@ -26927,8 +26927,8 @@ const LOCALES = {
     goal_continuing_toast: 'در حال ادامه تلاش به سوی هدف…',
     goal_status_none: 'هیچ هدف فعالی وجود ندارد. با دستور /goal <متن> هدفی تعیین کنید.',
     goal_status_active: (turns, max_turns, goal) => `⊙ هدف (فعال، ${turns}/${max_turns} دور): ${goal}`,
-    goal_status_paused: (turns, max_turns, goal) => `⏸ هدف (متوقف، ${turns}/${max_turns} دور): ${goal}`,
-    goal_status_done: (turns, max_turns, goal) => `✓ هدف (تکمیل در ${turns} دور): ${goal}`,
+    goal_status_paused: (turns, max_turns, reason, goal) => `⏸ هدف (متوقف، ${turns}/${max_turns}${reason ? `، ${reason}` : ''}): ${goal}`,
+    goal_status_done: (turns, max_turns, goal) => `✓ هدف تکمیل شد (${turns}/${max_turns}): ${goal}`,
     goal_set: (turns, goal) => `⊙ هدف تعیین شد (بودجه ${turns} دور): ${goal}`,
     goal_paused: (goal) => `⏸ هدف متوقف شد: ${goal}`,
     goal_resumed: (goal) => `▶ هدف از سر گرفته شد: ${goal}`,
@@ -28392,7 +28392,6 @@ const LOCALES = {
     yolo_no_session: 'هیچ نشست فعالی وجود ندارد',
     yolo_enabled: '⚡ حالت YOLO فعال شد — تأییدیه‌ها در این نشست نادیده گرفته می‌شوند',
     yolo_disabled: 'حالت YOLO غیرفعال شد',
-    kanban_bulk_status_aria: 'وضعیت دسته‌ای',
     cron_badge_notifications_disabled: 'غیرفعال',
     cron_badge_notifications_enabled: 'فعال',
     cron_badge_notifications_hint: 'شمارش تکمیل این کار در نشان وظایف و نشانگر اجرای جدید. برای کارهای پرتکرار خاموش کنید.',
@@ -28814,6 +28813,8 @@ function setLocale(lang) {
         } else {
           document.documentElement.classList.remove('chat-content-rtl');
         }
+      } else if (typeof window !== 'undefined' && window._serverRtl === true) {
+        document.documentElement.classList.add('chat-content-rtl');
       } else {
         if (resolved === 'fa') {
           document.documentElement.classList.add('chat-content-rtl');
