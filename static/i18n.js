@@ -28806,20 +28806,32 @@ function setLocale(lang) {
   }
   if (document.documentElement.classList) {
     try {
-      const explicitRtl = localStorage.getItem('hermes-rtl');
-      if (explicitRtl !== null) {
-        if (explicitRtl === 'true') {
-          document.documentElement.classList.add('chat-content-rtl');
-        } else {
-          document.documentElement.classList.remove('chat-content-rtl');
-        }
-      } else if (typeof window !== 'undefined' && window._serverRtl === true) {
+      const rtlMode = (typeof window !== 'undefined' && window._rtlMode) || localStorage.getItem('hermes-rtl-mode');
+      if (rtlMode === 'on') {
         document.documentElement.classList.add('chat-content-rtl');
-      } else {
+      } else if (rtlMode === 'off') {
+        document.documentElement.classList.remove('chat-content-rtl');
+      } else if (rtlMode === 'auto') {
         if (resolved === 'fa') {
           document.documentElement.classList.add('chat-content-rtl');
         } else {
           document.documentElement.classList.remove('chat-content-rtl');
+        }
+      } else {
+        // Fallback for legacy localStorage['hermes-rtl']
+        const explicitRtl = localStorage.getItem('hermes-rtl');
+        if (explicitRtl !== null) {
+          if (explicitRtl === 'true') {
+            document.documentElement.classList.add('chat-content-rtl');
+          } else {
+            document.documentElement.classList.remove('chat-content-rtl');
+          }
+        } else {
+          if (resolved === 'fa') {
+            document.documentElement.classList.add('chat-content-rtl');
+          } else {
+            document.documentElement.classList.remove('chat-content-rtl');
+          }
         }
       }
     } catch (_) {}

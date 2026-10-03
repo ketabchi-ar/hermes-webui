@@ -8808,7 +8808,10 @@ function _preferencesPayloadFromUi(){
   const soundCb=$('settingsSoundEnabled');
   if(soundCb) payload.sound_enabled=soundCb.checked;
   const rtlCb=$('settingsRtl');
-  if(rtlCb) payload.rtl=rtlCb.checked;
+  if(rtlCb){
+    payload.rtl=rtlCb.checked;
+    payload.rtl_mode=window._rtlMode||(localStorage.getItem('hermes-rtl-mode')||'auto');
+  }
   const notifCb=$('settingsNotificationsEnabled');
   if(notifCb) payload.notifications_enabled=notifCb.checked;
   const sidebarDensitySel=$('settingsSidebarDensity');
@@ -9378,7 +9381,7 @@ async function loadSettingsPanel(){
       langSel.addEventListener('change',function(){
         if(typeof setLocale==='function'){setLocale(this.value);if(typeof applyLocaleToDOM==='function')applyLocaleToDOM();}
         const rtlBox = $('settingsRtl');
-        if (rtlBox && localStorage.getItem('hermes-rtl') === null && window._serverRtl !== true) {
+        if (rtlBox && (window._rtlMode || 'auto') === 'auto') {
           const autoRtl = this.value === 'fa';
           rtlBox.checked = autoRtl;
           document.documentElement.classList.toggle('chat-content-rtl', autoRtl);
@@ -9558,25 +9561,34 @@ async function loadSettingsPanel(){
     if(rtlCb){
       const currentLocale = (typeof _locale !== 'undefined' && _locale && _locale._lang) || (typeof resolvePreferredLocale === 'function' ? resolvePreferredLocale() : localStorage.getItem('hermes-lang'));
       const isFaLocale = currentLocale === 'fa';
-      const storedRtl = localStorage.getItem('hermes-rtl');
-      let saved;
-      if (storedRtl !== null) {
-        saved = storedRtl === 'true';
-      } else if (settings && settings.rtl === true) {
-        saved = true;
+      const localRtlMode = localStorage.getItem('hermes-rtl-mode');
+      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode)) ? settings.rtl_mode : null;
+      let effectiveMode;
+      if (localRtlMode && ['auto','on','off'].includes(localRtlMode)) {
+        effectiveMode = localRtlMode;
+      } else if (serverRtlMode) {
+        effectiveMode = serverRtlMode;
       } else {
-        saved = isFaLocale;
+        effectiveMode = 'auto';
       }
+      window._rtlMode = effectiveMode;
+      try{localStorage.setItem('hermes-rtl-mode', effectiveMode);}catch(_){}
+      const saved = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);
       rtlCb.checked = saved;
+      try{localStorage.setItem('hermes-rtl', saved ? 'true' : 'false');}catch(_){}
       document.documentElement.classList.toggle('chat-content-rtl', saved);
       rtlCb.addEventListener('change',()=>{
         const on = rtlCb.checked;
-        try{localStorage.setItem('hermes-rtl', on ? 'true' : 'false');}catch(_){}
+        const newMode = on ? 'on' : 'off';
+        window._rtlMode = newMode;
+        try{
+          localStorage.setItem('hermes-rtl-mode', newMode);
+          localStorage.setItem('hermes-rtl', on ? 'true' : 'false');
+        }catch(_){}
         document.documentElement.classList.toggle('chat-content-rtl', on);
         _schedulePreferencesAutosave();
       },{once:false});
     }
-    if (settings && typeof settings.rtl === 'boolean') window._serverRtl = settings.rtl;
     if(typeof window._mirrorSpeechSettingsFromServer==='function') window._mirrorSpeechSettingsFromServer(settings);
     const persistedSpeechKeys = new Set(
       Array.isArray(settings && settings.persisted_speech_keys)
@@ -12893,6 +12905,7 @@ async function saveSettings(andClose){
   body.whats_new_summary_enabled=!!($('settingsWhatsNewSummary')||{}).checked;
   body.sound_enabled=!!($('settingsSoundEnabled')||{}).checked;
   body.rtl=!!($('settingsRtl')||{}).checked;
+  body.rtl_mode=window._rtlMode||(localStorage.getItem('hermes-rtl-mode')||'auto');
   body.notifications_enabled=!!($('settingsNotificationsEnabled')||{}).checked;
   body.show_thinking=window._showThinking!==false;
   body.sidebar_density=sidebarDensity;

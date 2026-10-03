@@ -11437,6 +11437,7 @@ _SETTINGS_DEFAULTS = {
     ),  # display name for the assistant
     "sound_enabled": False,  # play notification sound when assistant finishes
     "rtl": False,  # right-to-left chat layout (chat messages + composer only)
+    "rtl_mode": "auto",  # right-to-left chat layout mode: auto | on | off
     "notifications_enabled": False,  # browser notification when tab is in background
     "show_thinking": True,  # show/hide thinking/reasoning blocks in chat view
     "simplified_tool_calling": True,  # legacy compatibility; Worklog renderer remains enabled
@@ -11688,6 +11689,7 @@ _SETTINGS_ENUM_VALUES = {
     "default_message_mode": {"queue", "interrupt", "steer"},
     "chat_activity_display_mode": {"compact_worklog", "transparent_stream", "hide_all_activity"},
     "structured_code_default_view": {"auto", "on", "off"},
+    "rtl_mode": {"auto", "on", "off"},
 }
 _SETTINGS_INT_RANGES = {
     "pinned_sessions_limit": (1, 99),

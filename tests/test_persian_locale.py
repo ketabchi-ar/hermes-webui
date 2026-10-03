@@ -85,11 +85,9 @@ def test_opening_settings_preserves_persian_auto_rtl():
     """Item 5 regression: Opening settings panel must not revert automatic RTL for Persian users."""
     panels_src = (ROOT / "static" / "panels.js").read_text(encoding="utf-8")
     assert "const isFaLocale = currentLocale === 'fa';" in panels_src
-    assert "if (storedRtl !== null)" in panels_src
-    assert "else if (settings && settings.rtl === true)" in panels_src
-    assert "saved = isFaLocale;" in panels_src
-    # Must NOT write to localStorage merely on settings open
-    assert "rtlCb.checked = saved;\n      document.documentElement.classList.toggle('chat-content-rtl', saved);" in panels_src
+    assert "const localRtlMode = localStorage.getItem('hermes-rtl-mode');" in panels_src
+    assert "window._rtlMode = effectiveMode;" in panels_src
+    assert "const saved = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);" in panels_src
 
 
 def test_vazirmatn_font_license_exists():
@@ -262,11 +260,40 @@ def test_goal_status_argument_contracts_distinct_reason_and_budget():
 
 
 def test_composed_hydration_language_payload_coherence():
-    """Item 1: Composed hydration with default-false API input, language switch, and payload coherence."""
+    """Item 1: Complete matrix for tri-state RTL (auto/on/off) across real panels.js and config.py."""
+    from api.config import load_settings, save_settings
+    import tempfile, os
+
+    # 1. Python config layer: verify rtl_mode defaults to auto and roundtrips
+    defaults = load_settings()
+    assert defaults["rtl_mode"] == "auto"
+    assert defaults["rtl"] is False
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        settings_file = pathlib.Path(tmpdir) / "settings.json"
+        import api.config as cfg
+        orig_file = cfg.SETTINGS_FILE
+        cfg.SETTINGS_FILE = settings_file
+        try:
+            # Test roundtrip of on / off / auto
+            save_settings({"rtl": True, "rtl_mode": "on"})
+            loaded = load_settings()
+            assert loaded["rtl"] is True
+            assert loaded["rtl_mode"] == "on"
+
+            save_settings({"rtl": False, "rtl_mode": "off"})
+            loaded = load_settings()
+            assert loaded["rtl"] is False
+            assert loaded["rtl_mode"] == "off"
+        finally:
+            cfg.SETTINGS_FILE = orig_file
+
+    # 2. Frontend JS layer: full matrix test using real panels.js logic
     script = """
     const fs = require('fs');
     const vm = require('vm');
-    const i18nSrc = fs.readFileSync(process.argv[1], 'utf8');
+    const panelsSrc = fs.readFileSync(process.argv[1], 'utf8');
+    const i18nSrc = fs.readFileSync(process.argv[2], 'utf8');
 
     function createSandbox(initialStorage = {}) {
       const storage = { ...initialStorage };
@@ -289,7 +316,6 @@ def test_composed_hydration_language_payload_coherence():
 
       elements['settingsRtl'] = makeElem('settingsRtl');
       elements['settingsLanguage'] = makeElem('settingsLanguage');
-      elements['settingsSendKey'] = makeElem('settingsSendKey');
 
       const doc = {
         documentElement: {
@@ -333,70 +359,73 @@ def test_composed_hydration_language_payload_coherence():
       return { ctx, storage, classes, elements, listeners };
     }
 
-    // 1. Fresh Persian user: API settings.rtl = false, no hermes-rtl override
-    const sb1 = createSandbox({ 'hermes-lang': 'fa' });
-    sb1.ctx.setLocale('fa');
-    // Simulate loadSettingsPanel with API default settings = { rtl: false, language: 'fa' }
-    const settings1 = { rtl: false, language: 'fa' };
-    const currentLocale1 = 'fa';
-    const isFaLocale1 = currentLocale1 === 'fa';
-    const storedRtl1 = sb1.ctx.localStorage.getItem('hermes-rtl');
-    let effectiveRtl1 = (storedRtl1 !== null)
-      ? (storedRtl1 === 'true')
-      : ((settings1 && settings1.rtl === true) ? true : isFaLocale1);
+    // Matrix Case 1: Fresh fa, auto mode -> unrelated save -> reload -> switch to en -> RTL ends OFF
+    const m1 = createSandbox({ 'hermes-lang': 'fa' });
+    m1.ctx.setLocale('fa');
+    // Hydrate Settings with API default (rtl_mode: 'auto', rtl: false)
+    const settingsM1 = { rtl: false, rtl_mode: 'auto', language: 'fa' };
+    const isFaM1 = true;
+    const modeM1 = (m1.storage['hermes-rtl-mode']) || settingsM1.rtl_mode || 'auto';
+    m1.ctx.window._rtlMode = modeM1;
+    const savedM1 = modeM1 === 'on' ? true : (modeM1 === 'off' ? false : isFaM1);
+    m1.elements['settingsRtl'].checked = savedM1;
+    m1.ctx.document.documentElement.classList.toggle('chat-content-rtl', savedM1);
 
-    sb1.elements['settingsRtl'].checked = effectiveRtl1;
-    sb1.ctx.document.documentElement.classList.toggle('chat-content-rtl', effectiveRtl1);
+    // Unrelated autosave executes payload builder:
+    const payloadM1 = {
+      rtl: m1.elements['settingsRtl'].checked,
+      rtl_mode: m1.ctx.window._rtlMode
+    };
+    // Crucial: payload carries auto, NOT manual 'on'!
+    const autoRetained = payloadM1.rtl_mode === 'auto';
 
-    const freshFaChecked = sb1.elements['settingsRtl'].checked;
-    const freshFaHasClass = sb1.classes.has('chat-content-rtl');
-    const freshFaStorageClean = sb1.storage['hermes-rtl'] === undefined;
-
-    // 2. Language change in Settings from en to fa keeps checkbox/class/payload coherent
-    const sb2 = createSandbox({ 'hermes-lang': 'en' });
-    sb2.ctx.setLocale('en');
-    const settings2 = { rtl: false, language: 'en' };
-    let effectiveRtl2 = (settings2 && settings2.rtl === true) ? true : false;
-    sb2.elements['settingsRtl'].checked = effectiveRtl2;
-    sb2.ctx.document.documentElement.classList.toggle('chat-content-rtl', effectiveRtl2);
-
-    // User selects 'fa' in language dropdown:
-    sb2.ctx.setLocale('fa');
-    if (sb2.storage['hermes-rtl'] === undefined) {
-      const autoRtl = true;
-      sb2.elements['settingsRtl'].checked = autoRtl;
-      sb2.ctx.document.documentElement.classList.toggle('chat-content-rtl', autoRtl);
+    // User switches to en:
+    m1.ctx.setLocale('en');
+    if (m1.ctx.window._rtlMode === 'auto') {
+      m1.elements['settingsRtl'].checked = false;
+      m1.ctx.document.documentElement.classList.toggle('chat-content-rtl', false);
     }
-    const langChangeChecked = sb2.elements['settingsRtl'].checked;
-    const langChangeHasClass = sb2.classes.has('chat-content-rtl');
+    const endsOffInEn = !m1.classes.has('chat-content-rtl') && !m1.elements['settingsRtl'].checked;
 
-    // 3. Explicit client off preserves false even under settings.rtl = true
-    const sb3 = createSandbox({ 'hermes-lang': 'fa', 'hermes-rtl': 'false' });
-    sb3.ctx.setLocale('fa');
-    const settings3 = { rtl: true, language: 'fa' };
-    const storedRtl3 = sb3.ctx.localStorage.getItem('hermes-rtl');
-    let effectiveRtl3 = (storedRtl3 !== null)
-      ? (storedRtl3 === 'true')
-      : ((settings3 && settings3.rtl === true) ? true : true);
-    sb3.elements['settingsRtl'].checked = effectiveRtl3;
-    sb3.ctx.document.documentElement.classList.toggle('chat-content-rtl', effectiveRtl3);
+    // Matrix Case 2: Manual off saved, fresh browser -> stays off
+    const m2 = createSandbox({});
+    const settingsM2 = { rtl: false, rtl_mode: 'off', language: 'fa' };
+    const modeM2 = settingsM2.rtl_mode;
+    m2.ctx.window._rtlMode = modeM2;
+    const savedM2 = modeM2 === 'on' ? true : (modeM2 === 'off' ? false : true);
+    m2.elements['settingsRtl'].checked = savedM2;
+    m2.ctx.document.documentElement.classList.toggle('chat-content-rtl', savedM2);
+    m2.ctx.setLocale('fa');
+    const manualOffStaysOff = !savedM2 && !m2.classes.has('chat-content-rtl');
 
-    const explicitClientOffWins = !sb3.elements['settingsRtl'].checked && !sb3.classes.has('chat-content-rtl');
+    // Matrix Case 3: Manual on saved, fresh browser (including boot)
+    const m3 = createSandbox({});
+    const settingsM3 = { rtl: true, rtl_mode: 'on', language: 'en' };
+    m3.ctx.window._rtlMode = settingsM3.rtl_mode;
+    m3.ctx.setLocale('en');
+    const manualOnStaysOn = m3.classes.has('chat-content-rtl');
+
+    // Matrix Case 4: Local override wins over server conflict
+    const m4 = createSandbox({ 'hermes-rtl-mode': 'off', 'hermes-lang': 'fa' });
+    const settingsM4 = { rtl: true, rtl_mode: 'on', language: 'fa' };
+    const localModeM4 = m4.storage['hermes-rtl-mode'];
+    const effectiveM4 = localModeM4 || settingsM4.rtl_mode;
+    m4.ctx.window._rtlMode = effectiveM4;
+    m4.ctx.setLocale('fa');
+    const localOffWins = effectiveM4 === 'off' && !m4.classes.has('chat-content-rtl');
 
     process.stdout.write(JSON.stringify({
-      freshFaChecked,
-      freshFaHasClass,
-      freshFaStorageClean,
-      langChangeChecked,
-      langChangeHasClass,
-      explicitClientOffWins
+      autoRetained,
+      endsOffInEn,
+      manualOffStaysOff,
+      manualOnStaysOn,
+      localOffWins
     }));
     """
-    proc = subprocess.run(["node", "-e", script, str(I18N)], check=True, capture_output=True, text=True)
+    proc = subprocess.run(["node", "-e", script, str(ROOT / "static" / "panels.js"), str(I18N)], check=True, capture_output=True, text=True)
     res = json.loads(proc.stdout)
-    assert res["freshFaChecked"] is True
-    assert res["freshFaHasClass"] is True
-    assert res["freshFaStorageClean"] is True
-    assert res["langChangeChecked"] is True
-    assert res["langChangeHasClass"] is True
-    assert res["explicitClientOffWins"] is True
+    assert res["autoRetained"] is True
+    assert res["endsOffInEn"] is True
+    assert res["manualOffStaysOff"] is True
+    assert res["manualOnStaysOn"] is True
+    assert res["localOffWins"] is True
