@@ -262,7 +262,7 @@ def test_goal_status_argument_contracts_distinct_reason_and_budget():
 def test_composed_hydration_language_payload_coherence():
     """Item 1: Complete matrix for tri-state RTL (auto/on/off) across real panels.js and config.py."""
     from api.config import load_settings, save_settings
-    import tempfile, os
+    import tempfile
 
     # 1. Python config layer: verify rtl_mode defaults to auto and roundtrips
     defaults = load_settings()

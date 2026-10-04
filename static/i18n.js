@@ -28392,6 +28392,7 @@ const LOCALES = {
     yolo_no_session: 'هیچ نشست فعالی وجود ندارد',
     yolo_enabled: '⚡ حالت YOLO فعال شد — تأییدیه‌ها در این نشست نادیده گرفته می‌شوند',
     yolo_disabled: 'حالت YOLO غیرفعال شد',
+    kanban_bulk_status_aria: 'وضعیت دسته‌ای',
     cron_badge_notifications_disabled: 'غیرفعال',
     cron_badge_notifications_enabled: 'فعال',
     cron_badge_notifications_hint: 'شمارش تکمیل این کار در نشان وظایف و نشانگر اجرای جدید. برای کارهای پرتکرار خاموش کنید.',

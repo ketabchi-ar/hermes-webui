@@ -9380,13 +9380,11 @@ async function loadSettingsPanel(){
       langSel.value=resolvedLanguage;
       langSel.addEventListener('change',function(){
         if(typeof setLocale==='function'){setLocale(this.value);if(typeof applyLocaleToDOM==='function')applyLocaleToDOM();}
-        const rtlBox = $('settingsRtl');
-        if (rtlBox && (window._rtlMode || 'auto') === 'auto') {
-          const autoRtl = this.value === 'fa';
-          rtlBox.checked = autoRtl;
-          document.documentElement.classList.toggle('chat-content-rtl', autoRtl);
-        }
         _schedulePreferencesAutosave();
+        const b=$('settingsRtl');
+        if(b&&(window._rtlMode||'auto')==='auto'){
+          const a=this.value==='fa';b.checked=a;document.documentElement.classList.toggle('chat-content-rtl',a);
+        }
       },{once:false});
     }
     const showUsageCb=$('settingsShowTokenUsage');
