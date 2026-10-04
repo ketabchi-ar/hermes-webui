@@ -9369,6 +9369,14 @@ async function loadSettingsPanel(){
     // Language preference — populate from LOCALES bundle
     const langSel=$('settingsLanguage');
     if(langSel){
+      langSel.addEventListener('change',function(){
+        if(typeof setLocale==='function'){setLocale(this.value);if(typeof applyLocaleToDOM==='function')applyLocaleToDOM();}
+        const b=$('settingsRtl');
+        if(b&&(window._rtlMode||'auto')==='auto'){
+          const a=this.value==='fa';b.checked=a;document.documentElement.classList.toggle('chat-content-rtl',a);
+        }
+        _schedulePreferencesAutosave();
+      },{once:false});
       langSel.innerHTML='';
       if(typeof LOCALES!=='undefined'){
         for(const [code,bundle] of Object.entries(LOCALES)){
@@ -9378,14 +9386,6 @@ async function loadSettingsPanel(){
         }
       }
       langSel.value=resolvedLanguage;
-      langSel.addEventListener('change',function(){
-        if(typeof setLocale==='function'){setLocale(this.value);if(typeof applyLocaleToDOM==='function')applyLocaleToDOM();}
-        _schedulePreferencesAutosave();
-        const b=$('settingsRtl');
-        if(b&&(window._rtlMode||'auto')==='auto'){
-          const a=this.value==='fa';b.checked=a;document.documentElement.classList.toggle('chat-content-rtl',a);
-        }
-      },{once:false});
     }
     const showUsageCb=$('settingsShowTokenUsage');
     if(showUsageCb){showUsageCb.checked=!!settings.show_token_usage;showUsageCb.addEventListener('change',_schedulePreferencesAutosave,{once:false});}
