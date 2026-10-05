@@ -9378,6 +9378,7 @@ async function loadSettingsPanel(){
         _schedulePreferencesAutosave();
       },{once:false});
       langSel.innerHTML='';
+      // Instant locale apply: setLocale(this.value)
       if(typeof LOCALES!=='undefined'){
         for(const [code,bundle] of Object.entries(LOCALES)){
           const opt=document.createElement('option');
