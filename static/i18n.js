@@ -28807,30 +28807,24 @@ function setLocale(lang) {
   }
   if (document.documentElement.classList) {
     try {
-      const localMode = localStorage.getItem('hermes-rtl-mode');
-      const serverMode = (typeof window !== 'undefined' && window._serverRtlMode);
-      const effectiveMode = (localMode && ['auto','on','off'].includes(localMode))
-        ? localMode
-        : (serverMode && ['auto','on','off'].includes(serverMode) ? serverMode : ((typeof window !== 'undefined' && window._rtlMode) || 'auto'));
+      let localMode = localStorage.getItem('hermes-rtl-mode');
+      const legacyLocalRtl = localStorage.getItem('hermes-rtl');
+      if (!localMode && legacyLocalRtl !== null && (legacyLocalRtl === 'true' || legacyLocalRtl === 'false')) {
+        localMode = legacyLocalRtl === 'true' ? 'on' : 'off';
+        try { localStorage.setItem('hermes-rtl-mode', localMode); } catch (_) {}
+      }
+      const liveMode = (typeof window !== 'undefined' && window._rtlMode && ['auto','on','off'].includes(window._rtlMode)) ? window._rtlMode : null;
+      const serverMode = (typeof window !== 'undefined' && window._serverRtlMode && ['auto','on','off'].includes(window._serverRtlMode)) ? window._serverRtlMode : null;
+      const effectiveMode = liveMode || localMode || serverMode || 'auto';
       if (effectiveMode === 'on') {
         document.documentElement.classList.add('chat-content-rtl');
       } else if (effectiveMode === 'off') {
         document.documentElement.classList.remove('chat-content-rtl');
       } else {
-        // 'auto' mode or legacy fallback
-        const legacyRtl = localStorage.getItem('hermes-rtl');
-        if (legacyRtl !== null && !localMode && !serverMode) {
-          if (legacyRtl === 'true') {
-            document.documentElement.classList.add('chat-content-rtl');
-          } else {
-            document.documentElement.classList.remove('chat-content-rtl');
-          }
+        if (resolved === 'fa') {
+          document.documentElement.classList.add('chat-content-rtl');
         } else {
-          if (resolved === 'fa') {
-            document.documentElement.classList.add('chat-content-rtl');
-          } else {
-            document.documentElement.classList.remove('chat-content-rtl');
-          }
+          document.documentElement.classList.remove('chat-content-rtl');
         }
       }
     } catch (_) {}

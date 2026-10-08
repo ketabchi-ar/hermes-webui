@@ -11640,6 +11640,12 @@ def load_settings() -> dict:
         # Honor a stored True only when that marker is present.
         if not bool(stored.get("virtualize_transcript_optin")):
             settings["virtualize_transcript"] = False
+        # Legacy RTL preference migration (#7699).
+        # When rtl_mode is absent, a raw server rtl=True indicates explicit intent
+        # to enable RTL. Migrate it to "on". An ambiguous legacy server False
+        # remains eligible for default "auto".
+        if "rtl_mode" not in stored and stored.get("rtl") is True:
+            settings["rtl_mode"] = "on" 
     # Fall back to the DEFAULTS, not to None, when nothing is stored.
     #
     # `_read_raw_settings_file()` returns {} for a MISSING settings.json, and {}

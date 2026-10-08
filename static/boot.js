@@ -3432,6 +3432,8 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
     _applyFontSize(fontSize);
     if(s && typeof s.rtl_mode === 'string' && ['auto','on','off'].includes(s.rtl_mode)){
       window._serverRtlMode = s.rtl_mode;
+    } else if(s && s.rtl === true && !s.rtl_mode){
+      window._serverRtlMode = 'on';
     }
     if(typeof setLocale==='function'){
       const _lang=typeof resolvePreferredLocale==='function'

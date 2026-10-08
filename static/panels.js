@@ -8909,8 +8909,10 @@ function _setPreferencesAutosaveStatus(state,owner){
 
 function _rememberPreferencesSaved(payload){
   if(!payload) return;
-  if(payload.send_key!==undefined) localStorage.setItem('hermes-pref-send_key',payload.send_key);
-  if(payload.language!==undefined) localStorage.setItem('hermes-pref-language',payload.language);
+  try{
+    if(payload.send_key!==undefined) localStorage.setItem('hermes-pref-send_key',payload.send_key);
+    if(payload.language!==undefined) localStorage.setItem('hermes-pref-language',payload.language);
+  }catch(_){}
 }
 
 function _applyWorkspaceTodosTabVisibility(){
@@ -8974,6 +8976,9 @@ async function _autosavePreferencesSettings(payload){
     }
     if(payload&&payload.new_chat_on_workspace_switch!==undefined){
       window._newChatOnWorkspaceSwitch=!!(saved&&saved.new_chat_on_workspace_switch);  // #5473
+    }
+    if(saved && typeof saved.rtl_mode === 'string' && ['auto','on','off'].includes(saved.rtl_mode)){
+      window._serverRtlMode = saved.rtl_mode;
     }
     _settingsPreferencesAutosaveRetryPayload=null;
     _setPreferencesAutosaveStatus('saved');
@@ -9378,7 +9383,6 @@ async function loadSettingsPanel(){
         _schedulePreferencesAutosave();
       },{once:false});
       langSel.innerHTML='';
-      // Instant locale apply: setLocale(this.value)
       if(typeof LOCALES!=='undefined'){
         for(const [code,bundle] of Object.entries(LOCALES)){
           const opt=document.createElement('option');
@@ -9560,8 +9564,15 @@ async function loadSettingsPanel(){
     if(rtlCb){
       const currentLocale = (typeof _locale !== 'undefined' && _locale && _locale._lang) || (typeof resolvePreferredLocale === 'function' ? resolvePreferredLocale() : localStorage.getItem('hermes-lang'));
       const isFaLocale = currentLocale === 'fa';
-      const localRtlMode = localStorage.getItem('hermes-rtl-mode');
-      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode)) ? settings.rtl_mode : null;
+      let localRtlMode = localStorage.getItem('hermes-rtl-mode');
+      const legacyLocalRtl = localStorage.getItem('hermes-rtl');
+      if (!localRtlMode && legacyLocalRtl !== null && (legacyLocalRtl === 'true' || legacyLocalRtl === 'false')) {
+        localRtlMode = legacyLocalRtl === 'true' ? 'on' : 'off';
+        try { localStorage.setItem('hermes-rtl-mode', localRtlMode); } catch (_) {}
+      }
+      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode))
+        ? settings.rtl_mode
+        : (settings && settings.rtl === true && !settings.rtl_mode ? 'on' : null);
       let effectiveMode;
       if (localRtlMode && ['auto','on','off'].includes(localRtlMode)) {
         effectiveMode = localRtlMode;
@@ -9571,7 +9582,7 @@ async function loadSettingsPanel(){
         effectiveMode = 'auto';
       }
       window._rtlMode = effectiveMode;
-      if (settings && typeof settings.rtl_mode === 'string') window._serverRtlMode = settings.rtl_mode;
+      if (serverRtlMode) window._serverRtlMode = serverRtlMode;
       const saved = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);
       rtlCb.checked = saved;
       document.documentElement.classList.toggle('chat-content-rtl', saved);
@@ -12184,6 +12195,13 @@ function _applySavedSettingsUi(saved, body, opts){
   window._botName=body.bot_name||'Hermes';
   if(typeof applyBotName==='function') applyBotName();
   else if(typeof _applyBusyComposerPlaceholder==='function') _applyBusyComposerPlaceholder();
+  const _savedMode = (saved && typeof saved.rtl_mode === 'string' && ['auto','on','off'].includes(saved.rtl_mode))
+    ? saved.rtl_mode
+    : ((body && typeof body.rtl_mode === 'string' && ['auto','on','off'].includes(body.rtl_mode)) ? body.rtl_mode : null);
+  if (_savedMode) {
+    window._serverRtlMode = _savedMode;
+    if (!window._rtlMode) window._rtlMode = _savedMode;
+  }
   if(typeof setLocale==='function') setLocale(language);
   if(typeof applyLocaleToDOM==='function') applyLocaleToDOM();
   _ensureComposerControlVisibilityState(saved||body||{});
