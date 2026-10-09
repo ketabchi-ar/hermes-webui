@@ -300,6 +300,23 @@ def test_composed_hydration_language_payload_coherence():
             loaded = load_settings()
             assert loaded["rtl_mode"] == "auto"
             assert loaded["rtl"] is False
+
+            # (e) Boolean-only saves translate to rtl_mode when omitted (#7699)
+            save_settings({"rtl": True})
+            loaded = load_settings()
+            assert loaded["rtl"] is True
+            assert loaded["rtl_mode"] == "on"
+
+            save_settings({"rtl": False})
+            loaded = load_settings()
+            assert loaded["rtl"] is False
+            assert loaded["rtl_mode"] == "off"
+
+            # (f) Explicit rtl_mode is preserved alongside boolean rtl
+            save_settings({"rtl": False, "rtl_mode": "auto"})
+            loaded = load_settings()
+            assert loaded["rtl"] is False
+            assert loaded["rtl_mode"] == "auto"
         finally:
             cfg.SETTINGS_FILE = orig_file
 

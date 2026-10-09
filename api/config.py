@@ -11870,6 +11870,8 @@ def save_settings(settings: dict) -> dict:
         settings["default_message_mode"] = settings.get("busy_input_mode")
     settings.pop("busy_input_mode", None)
     settings.pop("simplified_tool_calling", None)
+    if "rtl" in settings and "rtl_mode" not in settings:
+        settings["rtl_mode"] = "on" if bool(settings["rtl"]) else "off"
     pending_theme = current.get("theme")
     pending_skin = current.get("skin")
     theme_was_explicit = False
