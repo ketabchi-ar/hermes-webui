@@ -44,7 +44,11 @@ def test_fa_locale_structure_and_rtl():
       hasRtlClass,
       lang,
       settings_tab_preferences: faBundle.settings_tab_preferences,
-      settings_label_rtl: faBundle.settings_label_rtl
+      settings_label_rtl: faBundle.settings_label_rtl,
+      remote_image_open: faBundle.remote_image_open,
+      project_picker_none: faBundle.project_picker_none,
+      project_picker_new: faBundle.project_picker_new,
+      session_new_tab_other_profile: faBundle.session_new_tab_other_profile
     }));
     """
     proc = subprocess.run(["node", "-e", script, str(I18N)], check=True, capture_output=True, text=True)
@@ -55,6 +59,10 @@ def test_fa_locale_structure_and_rtl():
     assert res["lang"] == "fa-IR"
     assert res["settings_tab_preferences"] == "ترجیحات"
     assert res["settings_label_rtl"] == "چیدمان راست‌به‌چپ چت"
+    assert res["remote_image_open"] == "باز کردن تصویر"
+    assert res["project_picker_none"] == "بدون پروژه"
+    assert res["project_picker_new"] == "پروژه جدید..."
+    assert res["session_new_tab_other_profile"] == "این نشست متعلق به نمایه دیگری است. در برگه فعلی بازش کنید."
 
 
 def test_sessions_source_placeholders_preserved():
@@ -200,12 +208,12 @@ def test_rtl_state_transitions_default_and_explicit():
     const faAutoRtl = s1.classes.has('chat-content-rtl');
     const faStorageClean = s1.storage['hermes-rtl'] === undefined;
 
-    // 3. Explicit fa opt-out -> user unchecks RTL checkbox (stored 'false')
-    s1.storage['hermes-rtl'] = 'false';
+    // 3. Explicit fa opt-out -> user unchecks RTL checkbox (stored 'off' in hermes-rtl-mode)
+    s1.storage['hermes-rtl-mode'] = 'off';
     s1.ctx.setLocale('fa');
     const explicitFaOff = !s1.classes.has('chat-content-rtl');
 
-    // 4. Explicit en opt-in -> user checks RTL in en (stored 'true')
+    // 4. Explicit en opt-in -> user checks RTL in en (stored 'true' in legacy or 'on' in hermes-rtl-mode)
     const s2 = setup({ 'hermes-rtl': 'true' });
     s2.ctx.setLocale('en');
     const explicitEnOn = s2.classes.has('chat-content-rtl');
@@ -317,6 +325,12 @@ def test_composed_hydration_language_payload_coherence():
             loaded = load_settings()
             assert loaded["rtl"] is False
             assert loaded["rtl_mode"] == "auto"
+
+            # (g) rtl_mode: None with rtl: True is translated to on
+            save_settings({"rtl": True, "rtl_mode": None})
+            loaded = load_settings()
+            assert loaded["rtl"] is True
+            assert loaded["rtl_mode"] == "on"
         finally:
             cfg.SETTINGS_FILE = orig_file
 
@@ -465,12 +479,12 @@ def test_composed_hydration_language_payload_coherence():
     }
 
     (async () => {
-      // 1. Legacy local hermes-rtl='false' + language fa, no stored mode -> RTL turns OFF
+      // 1. Legacy local hermes-rtl='false' + language fa, no stored mode -> ambiguous legacy false does NOT turn off auto RTL
       const env1 = setupEnvironment({ 'hermes-rtl': 'false' }, { rtl_mode: 'auto', rtl: false, language: 'fa' });
       await env1.win.loadSettingsPanel();
-      const legacyLocalOffTurnsOff = !env1.classes.has('chat-content-rtl') && !env1.elements['settingsRtl'].checked;
+      const legacyLocalOffKeepsAutoOn = env1.classes.has('chat-content-rtl') && env1.elements['settingsRtl'].checked;
       const p1 = env1.win._preferencesPayloadFromUi();
-      const legacyLocalOffPayload = p1.rtl === false && p1.rtl_mode === 'off';
+      const legacyLocalOffPayload = p1.rtl === true && p1.rtl_mode === 'auto';
 
       // 2. Legacy local hermes-rtl='true' + language en -> RTL turns ON
       const env2 = setupEnvironment({ 'hermes-rtl': 'true' }, { rtl_mode: 'auto', rtl: false, language: 'en' });
@@ -525,16 +539,16 @@ def test_composed_hydration_language_payload_coherence():
       await env7b.win.loadSettingsPanel();
       const freshManualOff = !env7b.classes.has('chat-content-rtl') && !env7b.elements['settingsRtl'].checked;
 
-      // 8. Both local/server conflicts:
-      // Local off wins over server on
+      // 8. Server mode outranks local storage:
+      // Server on outranks local off
       const env8a = setupEnvironment({ 'hermes-rtl-mode': 'off' }, { rtl_mode: 'on', rtl: true, language: 'fa' });
       await env8a.win.loadSettingsPanel();
-      const localOffWinsServerOn = !env8a.classes.has('chat-content-rtl') && !env8a.elements['settingsRtl'].checked;
+      const serverOnWinsLocalOff = env8a.classes.has('chat-content-rtl') && env8a.elements['settingsRtl'].checked;
 
-      // Local on wins over server off
+      // Server off outranks local on
       const env8b = setupEnvironment({ 'hermes-rtl-mode': 'on' }, { rtl_mode: 'off', rtl: false, language: 'en' });
       await env8b.win.loadSettingsPanel();
-      const localOnWinsServerOff = env8b.classes.has('chat-content-rtl') && env8b.elements['settingsRtl'].checked;
+      const serverOffWinsLocalOn = !env8b.classes.has('chat-content-rtl') && !env8b.elements['settingsRtl'].checked;
 
       // 9. Both save paths (saveSettings & autosave) persist correct values
       const env9 = setupEnvironment({}, { rtl_mode: 'auto', rtl: false, language: 'fa' });
@@ -557,14 +571,14 @@ def test_composed_hydration_language_payload_coherence():
       const afterReloadSwitchEnRtlOff = !env10.classes.has('chat-content-rtl');
 
       process.stdout.write(JSON.stringify({
-        legacyLocalOffTurnsOff, legacyLocalOffPayload,
+        legacyLocalOffKeepsAutoOn, legacyLocalOffPayload,
         legacyLocalOnTurnsOn, legacyLocalOnPayload,
         legacyServerOnShowsOn, legacyServerOnPayload, legacyServerOnSaved,
         storageThrowsManualOffStaysOff,
         storageThrowsManualOnStaysOn,
         autoFaShowsOn, autoRetainedInPayload, autoSwitchToEnEndsOff,
         freshManualOn, freshManualOff,
-        localOffWinsServerOn, localOnWinsServerOff,
+        serverOnWinsLocalOff, serverOffWinsLocalOn,
         explicitSavePersisted, autosavePersisted,
         bootFaRtl, afterReloadSwitchEnRtlOff
       }));

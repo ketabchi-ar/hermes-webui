@@ -26689,6 +26689,11 @@ const LOCALES = {
     sessions_source_webui: 'نشست‌های وب‌یوآی ({0})',
     sessions_source_cli: 'نشست‌های CLI ({0})',
     _speech: 'fa-IR',
+    remote_image_open: 'باز کردن تصویر',
+    remote_image_reason: 'تصویر دوردست به صورت خودکار بارگذاری نشد. {host} در برگه جدید باز می‌شود.',
+    session_new_tab_other_profile: 'این نشست متعلق به نمایه دیگری است. در برگه فعلی بازش کنید.',
+    project_picker_none: 'بدون پروژه',
+    project_picker_new: 'پروژه جدید...',
     cancelling: 'در حال لغو...',
     cancel_failed: 'لغو عملیات ناموفق بود',
     mic_denied: 'دسترسی به میکروفون رد شد. لطفاً در تنظیمات مرورگر مجوز دسترسی را فعال کنید.',
@@ -27326,7 +27331,7 @@ const LOCALES = {
     settings_plugins_title: "افزونه‌ها",
     plugins_enable_toggle: "فعال",
     settings_plugins_meta: "مشاهده افزونه‌های نصب‌شده هرمس و هوک‌های چرخه حیات ثبت‌شده توسط آن‌ها. این پنل فقط خواندنی است.",
-    settings_plugins_empty: 'هیچ افزونه‌ای برای هرمس یافت نشد.',
+    settings_plugins_empty: 'هیچ افزونه‌ای برای هرمس در حال حاضر قابل مشاهده نیست. افزونه‌ها را از طریق CLI یا فایل تنظیمات هرمس نصب یا فعال کنید تا در اینجا نمایش داده شوند.',
     plugins_unnamed: 'افزونه بدون نام',
     plugins_no_description: 'توضیحاتی ثبت نشده است.',
     plugins_no_hooks: "هیچ هوک چرخه حیاتی ثبت نشده است",
@@ -27710,7 +27715,7 @@ const LOCALES = {
     settings_desc_webhook_sessions: "نمایش نشست‌هایی که از طریق رویدادهای وب‌هوک ایجاد شده‌اند.",
     settings_desc_kanban_sessions: "نمایش تاریخچه نشست‌هایی که توسط وظایف کارگران کانبان اجرا شده‌اند.",
     settings_desc_previous_messaging_sessions: "نمایش نشست‌های قدیمی پیام‌رسان‌های تلگرام، دیسکورد، اسلک و وی‌چت.",
-    settings_desc_sync_insights: "ثبت داده‌های توکن در دیتابیس برای نمایش دقیق آمار در بخش بینش‌ها.",
+    settings_desc_sync_insights: 'میزان مصرف توکن وب‌یوآی را در state.db ثبت می‌کند تا hermes /insights شامل داده‌های نشست مرورگر باشد. به‌طور پیش‌فرض غیرفعال است.',
     settings_desc_check_updates: "نمایش بنر اطلاع‌رسانی در صورت وجود نسخه جدیدتر.",
     settings_desc_ignore_agent_updates: "بررسی بروزرسانی وب‌یوآی فعال بماند اما اعلان‌های بروزرسانی Agent نادیده گرفته شوند.",
     settings_desc_whats_new_summary: "به جای نمایش تغییرات خام کد، خلاصه روان و قابل فهم از ویژگی‌های جدید تولید می‌کند.",
@@ -28809,8 +28814,8 @@ function setLocale(lang) {
     try {
       let localMode = localStorage.getItem('hermes-rtl-mode');
       const legacyLocalRtl = localStorage.getItem('hermes-rtl');
-      if (!localMode && legacyLocalRtl !== null && (legacyLocalRtl === 'true' || legacyLocalRtl === 'false')) {
-        localMode = legacyLocalRtl === 'true' ? 'on' : 'off';
+      if (!localMode && legacyLocalRtl === 'true') {
+        localMode = 'on';
         try { localStorage.setItem('hermes-rtl-mode', localMode); } catch (_) {}
       }
       const liveMode = (typeof window !== 'undefined' && window._rtlMode && ['auto','on','off'].includes(window._rtlMode)) ? window._rtlMode : null;

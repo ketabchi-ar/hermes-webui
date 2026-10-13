@@ -9566,18 +9566,21 @@ async function loadSettingsPanel(){
       const isFaLocale = currentLocale === 'fa';
       let localRtlMode = localStorage.getItem('hermes-rtl-mode');
       const legacyLocalRtl = localStorage.getItem('hermes-rtl');
-      if (!localRtlMode && legacyLocalRtl !== null && (legacyLocalRtl === 'true' || legacyLocalRtl === 'false')) {
-        localRtlMode = legacyLocalRtl === 'true' ? 'on' : 'off';
+      if (!localRtlMode && legacyLocalRtl === 'true') {
+        localRtlMode = 'on';
         try { localStorage.setItem('hermes-rtl-mode', localRtlMode); } catch (_) {}
       }
-      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode))
+      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode) && settings.rtl_mode !== 'auto')
         ? settings.rtl_mode
         : (settings && settings.rtl === true && !settings.rtl_mode ? 'on' : null);
       let effectiveMode;
-      if (localRtlMode && ['auto','on','off'].includes(localRtlMode)) {
-        effectiveMode = localRtlMode;
-      } else if (serverRtlMode) {
+      if (serverRtlMode) {
         effectiveMode = serverRtlMode;
+        try { localStorage.setItem('hermes-rtl-mode', serverRtlMode); } catch (_) {}
+      } else if (localRtlMode && ['auto','on','off'].includes(localRtlMode)) {
+        effectiveMode = localRtlMode;
+      } else if (settings && settings.rtl_mode === 'auto') {
+        effectiveMode = 'auto';
       } else {
         effectiveMode = 'auto';
       }

@@ -112,8 +112,8 @@
       try{
         var mode = localStorage.getItem('hermes-rtl-mode');
         var legacy = localStorage.getItem('hermes-rtl');
-        if (!mode && legacy !== null && (legacy === 'true' || legacy === 'false')) {
-          mode = legacy === 'true' ? 'on' : 'off';
+        if (!mode && legacy === 'true') {
+          mode = 'on';
           try { localStorage.setItem('hermes-rtl-mode', mode); } catch(_) {}
         }
         if (mode === 'on') {
