@@ -3432,8 +3432,10 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
     _applyFontSize(fontSize);
     if(s && typeof s.rtl_mode === 'string' && ['auto','on','off'].includes(s.rtl_mode)){
       window._serverRtlMode = s.rtl_mode;
+      try { localStorage.setItem('hermes-rtl-mode', s.rtl_mode); } catch (_) {}
     } else if(s && s.rtl === true && !s.rtl_mode){
       window._serverRtlMode = 'on';
+      try { localStorage.setItem('hermes-rtl-mode', 'on'); } catch (_) {}
     }
     if(typeof setLocale==='function'){
       const _lang=typeof resolvePreferredLocale==='function'

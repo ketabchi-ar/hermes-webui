@@ -11586,7 +11586,11 @@ def _settings_payload_for_write(settings: dict, persisted_speech_keys: set[str])
 def load_settings() -> dict:
     """Load settings from disk, merging with defaults for any missing keys."""
     settings = dict(_SETTINGS_DEFAULTS)
+    settings["_rtl_mode_synthesized"] = True
     stored = _read_raw_settings_file()
+    if isinstance(stored, dict):
+        if "rtl_mode" in stored:
+            settings.pop("_rtl_mode_synthesized", None)
     if isinstance(stored, dict):
         if (
             "worklog_details_expanded_default" not in stored
@@ -11644,8 +11648,10 @@ def load_settings() -> dict:
         # When rtl_mode is absent, a raw server rtl=True indicates explicit intent
         # to enable RTL. Migrate it to "on". An ambiguous legacy server False
         # remains eligible for default "auto".
-        if "rtl_mode" not in stored and stored.get("rtl") is True:
-            settings["rtl_mode"] = "on" 
+        if "rtl_mode" not in stored:
+            if stored.get("rtl") is True:
+                settings["rtl_mode"] = "on"
+                settings.pop("_rtl_mode_synthesized", None)
     # Fall back to the DEFAULTS, not to None, when nothing is stored.
     #
     # `_read_raw_settings_file()` returns {} for a MISSING settings.json, and {}

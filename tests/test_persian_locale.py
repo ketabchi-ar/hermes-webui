@@ -487,7 +487,7 @@ def test_composed_hydration_language_payload_coherence():
       const legacyLocalOffPayload = p1.rtl === true && p1.rtl_mode === 'auto';
 
       // 2. Legacy local hermes-rtl='true' + language en -> RTL turns ON
-      const env2 = setupEnvironment({ 'hermes-rtl': 'true' }, { rtl_mode: 'auto', rtl: false, language: 'en' });
+      const env2 = setupEnvironment({ 'hermes-rtl': 'true' }, { language: 'en' });
       await env2.win.loadSettingsPanel();
       const legacyLocalOnTurnsOn = env2.classes.has('chat-content-rtl') && env2.elements['settingsRtl'].checked;
       const p2 = env2.win._preferencesPayloadFromUi();
@@ -550,6 +550,11 @@ def test_composed_hydration_language_payload_coherence():
       await env8b.win.loadSettingsPanel();
       const serverOffWinsLocalOn = !env8b.classes.has('chat-content-rtl') && !env8b.elements['settingsRtl'].checked;
 
+      // Server auto outranks local off for fa (auto means RTL for fa)
+      const env8c = setupEnvironment({ 'hermes-rtl-mode': 'off' }, { rtl_mode: 'auto', rtl: false, language: 'fa' });
+      await env8c.win.loadSettingsPanel();
+      const serverAutoWinsLocalOffForFa = env8c.classes.has('chat-content-rtl') && env8c.elements['settingsRtl'].checked;
+
       // 9. Both save paths (saveSettings & autosave) persist correct values
       const env9 = setupEnvironment({}, { rtl_mode: 'auto', rtl: false, language: 'fa' });
       await env9.win.loadSettingsPanel();
@@ -578,7 +583,7 @@ def test_composed_hydration_language_payload_coherence():
         storageThrowsManualOnStaysOn,
         autoFaShowsOn, autoRetainedInPayload, autoSwitchToEnEndsOff,
         freshManualOn, freshManualOff,
-        serverOnWinsLocalOff, serverOffWinsLocalOn,
+        serverOnWinsLocalOff, serverOffWinsLocalOn, serverAutoWinsLocalOffForFa,
         explicitSavePersisted, autosavePersisted,
         bootFaRtl, afterReloadSwitchEnRtlOff
       }));

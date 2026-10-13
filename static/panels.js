@@ -9570,7 +9570,7 @@ async function loadSettingsPanel(){
         localRtlMode = 'on';
         try { localStorage.setItem('hermes-rtl-mode', localRtlMode); } catch (_) {}
       }
-      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode) && settings.rtl_mode !== 'auto')
+      const serverRtlMode = (settings && typeof settings.rtl_mode === 'string' && ['auto','on','off'].includes(settings.rtl_mode) && (!settings._rtl_mode_synthesized || !localRtlMode))
         ? settings.rtl_mode
         : (settings && settings.rtl === true && !settings.rtl_mode ? 'on' : null);
       let effectiveMode;
@@ -9579,8 +9579,6 @@ async function loadSettingsPanel(){
         try { localStorage.setItem('hermes-rtl-mode', serverRtlMode); } catch (_) {}
       } else if (localRtlMode && ['auto','on','off'].includes(localRtlMode)) {
         effectiveMode = localRtlMode;
-      } else if (settings && settings.rtl_mode === 'auto') {
-        effectiveMode = 'auto';
       } else {
         effectiveMode = 'auto';
       }

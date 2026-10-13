@@ -28820,7 +28820,7 @@ function setLocale(lang) {
       }
       const liveMode = (typeof window !== 'undefined' && window._rtlMode && ['auto','on','off'].includes(window._rtlMode)) ? window._rtlMode : null;
       const serverMode = (typeof window !== 'undefined' && window._serverRtlMode && ['auto','on','off'].includes(window._serverRtlMode)) ? window._serverRtlMode : null;
-      const effectiveMode = liveMode || localMode || serverMode || 'auto';
+      const effectiveMode = liveMode || serverMode || localMode || 'auto';
       if (effectiveMode === 'on') {
         document.documentElement.classList.add('chat-content-rtl');
       } else if (effectiveMode === 'off') {

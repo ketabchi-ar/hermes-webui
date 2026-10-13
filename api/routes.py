@@ -13609,8 +13609,12 @@ def handle_get(handler, parsed) -> bool:
             # The disk read + process-constant token substitutions are cached;
             # only the per-session CSRF token and per-request extension tags are
             # applied here (see _render_index_shell_base).
+            _boot_cfg = load_settings()
+            _boot_rtl = _boot_cfg.get("rtl_mode") if not _boot_cfg.get("_rtl_mode_synthesized") else ""
             html = _render_index_shell_base().replace(
                 "__CSRF_TOKEN_JSON__", json.dumps(csrf_token)
+            ).replace(
+                "__BOOT_RTL_MODE_JSON__", str(_boot_rtl or "")
             )
             return t(
                 handler,
