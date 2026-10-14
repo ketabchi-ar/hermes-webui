@@ -332,6 +332,27 @@ def test_composed_hydration_language_payload_coherence():
             assert loaded["rtl"] is True
             assert loaded["rtl_mode"] == "on"
 
+            # (g2) Malformed rtl_mode (list or dict) does NOT raise TypeError and falls back safely
+            # With rtl: True -> translates to on
+            save_settings({"rtl": True, "rtl_mode": []})
+            loaded = load_settings()
+            assert loaded["rtl"] is True
+            assert loaded["rtl_mode"] == "on"
+
+            save_settings({"rtl": False, "rtl_mode": {}})
+            loaded = load_settings()
+            assert loaded["rtl"] is False
+            assert loaded["rtl_mode"] == "off"
+
+            # Without boolean rtl, malformed rtl_mode is safely ignored without crashing
+            save_settings({"rtl_mode": ["invalid"]})
+            loaded = load_settings()
+            assert loaded["rtl_mode"] in ("auto", "off")
+
+            save_settings({"rtl_mode": {"invalid": "value"}})
+            loaded = load_settings()
+            assert loaded["rtl_mode"] in ("auto", "off")
+
             # (h) _rtl_mode_synthesized does not reach disk and does not survive save/load
             save_settings({"rtl_mode": "on", "rtl": True})
             with open(settings_file, "r", encoding="utf-8") as f:
@@ -667,10 +688,19 @@ def test_composed_hydration_language_payload_coherence():
 
             # 4. End-to-end handoff: inline bootstrap runs BEFORE eager i18n module
             # Must maintain correct direction across all intermediate and final states
+            # Uses the exact script extracted from index.html without manual _serverRtlMode seeding
             handoff_script = """
             const fs = require('fs');
             const vm = require('vm');
             const i18nSrc = fs.readFileSync(process.argv[1], 'utf8');
+            const indexHtml = fs.readFileSync(process.argv[2], 'utf8');
+            const startMarker = '// Salvaged from PR #1721';
+            const endMarker = '</script>';
+            const startIdx = indexHtml.indexOf(startMarker);
+            const endIdx = indexHtml.indexOf(endMarker, startIdx);
+            const inlineScriptTpl = (startIdx !== -1 && endIdx !== -1)
+              ? indexHtml.slice(startIdx, endIdx)
+              : '';
 
             function runHandoffTest(serverBootMode, initialStorage = {}, locale = 'fa') {
               const storage = { 'hermes-lang': locale, ...initialStorage };
@@ -701,27 +731,9 @@ def test_composed_hydration_language_payload_coherence():
               doc.defaultView = win;
               vm.createContext(win);
 
-              // Step A: Run rendered inline bootstrap (with bootMode injected)
-              const bootMode = serverBootMode;
-              if (['auto', 'on', 'off'].includes(bootMode)) {
-                win._serverRtlMode = bootMode;
-              }
-              var serverMode = bootMode || ((win._serverRtlMode) || null);
-              var mode = serverMode || win.localStorage.getItem('hermes-rtl-mode');
-              var legacy = win.localStorage.getItem('hermes-rtl');
-              if (!mode && legacy === 'true') {
-                mode = 'on';
-              }
-              if (mode === 'on') {
-                doc.documentElement.classList.add('chat-content-rtl');
-              } else if (mode === 'off') {
-                doc.documentElement.classList.remove('chat-content-rtl');
-              } else {
-                var lang = win.localStorage.getItem('hermes-lang') || 'en';
-                if (lang === 'fa') {
-                  doc.documentElement.classList.add('chat-content-rtl');
-                }
-              }
+              // Step A: Run actual rendered inline bootstrap from index.html with bootMode interpolated
+              const interpolatedScript = inlineScriptTpl.replace('__BOOT_RTL_MODE_VALUE__', JSON.stringify(serverBootMode));
+              vm.runInContext(interpolatedScript, win);
               const stepAHasRtl = classes.has('chat-content-rtl');
 
               // Step B: Eager load i18n.js (which invokes loadLocale() immediately at import)
@@ -755,7 +767,7 @@ def test_composed_hydration_language_payload_coherence():
               case1Ok, case2Ok, case3Ok, case4Ok, case5Ok
             }));
             """
-            proc = subprocess.run(["node", "-e", handoff_script, str(I18N)], check=True, capture_output=True, text=True)
+            proc = subprocess.run(["node", "-e", handoff_script, str(I18N), str(ROOT / "static" / "index.html")], check=True, capture_output=True, text=True)
             handoff_res = json.loads(proc.stdout)
             for k, v in handoff_res.items():
                 assert v is True, f"Handoff assertion failed for {k}"

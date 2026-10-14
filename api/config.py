@@ -11879,7 +11879,8 @@ def save_settings(settings: dict) -> dict:
         settings["default_message_mode"] = settings.get("busy_input_mode")
     settings.pop("busy_input_mode", None)
     settings.pop("simplified_tool_calling", None)
-    if "rtl" in settings and settings.get("rtl_mode") not in _SETTINGS_ENUM_VALUES["rtl_mode"]:
+    raw_rtl_mode = settings.get("rtl_mode")
+    if "rtl" in settings and (not isinstance(raw_rtl_mode, str) or raw_rtl_mode not in _SETTINGS_ENUM_VALUES["rtl_mode"]):
         settings["rtl_mode"] = "on" if bool(settings["rtl"]) else "off"
         current.pop("_rtl_mode_synthesized", None)
     pending_theme = current.get("theme")
@@ -11925,8 +11926,9 @@ def save_settings(settings: dict) -> dict:
                     skin_was_explicit = True
                 continue
             # Validate enum-constrained keys
-            if k in _SETTINGS_ENUM_VALUES and v not in _SETTINGS_ENUM_VALUES[k]:
-                continue
+            if k in _SETTINGS_ENUM_VALUES:
+                if not isinstance(v, str) or v not in _SETTINGS_ENUM_VALUES[k]:
+                    continue
             # Validate bounded integer settings.
             if k in _SETTINGS_INT_RANGES:
                 try:
