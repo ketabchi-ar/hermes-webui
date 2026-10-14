@@ -604,40 +604,55 @@ def test_composed_hydration_language_payload_coherence():
     for k, v in res.items():
         assert v is True, f"Assertion failed for {k}"
 
-    # 3. Test rendered shell bootstrap injection in routes.py
-    from api.routes import _render_index_shell_base
+    # 3. Test rendered shell bootstrap injection through real handle_get handler
+    from api.routes import _INDEX_SHELL_CACHE, handle_get
+    from urllib.parse import urlparse
     import tempfile
+
+    class _MockHttpHandler:
+        def __init__(self):
+            self.status = None
+            self.headers = {}
+            self.body = bytearray()
+            self.wfile = self
+
+        def send_response(self, status):
+            self.status = status
+
+        def send_header(self, name, value):
+            self.headers[name] = value
+
+        def end_headers(self):
+            pass
+
+        def write(self, data):
+            self.body.extend(data)
+
+    def _get_rendered_html():
+        _INDEX_SHELL_CACHE.clear()
+        handler = _MockHttpHandler()
+        handle_get(handler, urlparse("http://127.0.0.1:8787/"))
+        assert handler.status == 200
+        return handler.body.decode("utf-8")
+
     with tempfile.TemporaryDirectory() as tmpdir:
         fake_settings = pathlib.Path(tmpdir) / "settings.json"
         orig = cfg.SETTINGS_FILE
         cfg.SETTINGS_FILE = fake_settings
         try:
-            from api.routes import _INDEX_SHELL_CACHE
-            _INDEX_SHELL_CACHE.clear()
             # Server off with empty cache paints LTR
             save_settings({"rtl_mode": "off", "rtl": False})
             _boot_cfg = load_settings()
             assert not _boot_cfg.get("_rtl_mode_synthesized")
             assert _boot_cfg.get("rtl_mode") == "off"
-            _raw_rtl = _boot_cfg.get("rtl_mode")
-            _boot_rtl = _raw_rtl if (not _boot_cfg.get("_rtl_mode_synthesized") and _raw_rtl in ("on", "off", "auto")) else None
-            _boot_rtl_json = json.dumps(_boot_rtl).replace("<", "\\u003c")
-            html = _render_index_shell_base().replace(
-                "__BOOT_RTL_MODE_VALUE__", _boot_rtl_json
-            )
+            html = _get_rendered_html()
             assert 'var bootMode = "off";' in html
             assert "bootMode === 'off'" not in html
 
             # Verify crafted rtl_mode in settings.json does NOT interpolate raw script tag
             with open(fake_settings, "w", encoding="utf-8") as f:
                 json.dump({"rtl_mode": "</script><script>window.__injected=1</script>"}, f)
-            _boot_cfg2 = load_settings()
-            _raw_rtl2 = _boot_cfg2.get("rtl_mode")
-            _boot_rtl2 = _raw_rtl2 if (not _boot_cfg2.get("_rtl_mode_synthesized") and _raw_rtl2 in ("on", "off", "auto")) else None
-            _boot_rtl2_json = json.dumps(_boot_rtl2).replace("<", "\\u003c")
-            html2 = _render_index_shell_base().replace(
-                "__BOOT_RTL_MODE_VALUE__", _boot_rtl2_json
-            )
+            html2 = _get_rendered_html()
             assert "</script>" not in html2.split('var bootMode = ')[1].split(';')[0]
             assert "null" in html2.split('var bootMode = ')[1].split(';')[0]
 
