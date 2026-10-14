@@ -619,5 +619,100 @@ def test_composed_hydration_language_payload_coherence():
             )
             assert 'var bootMode = "off";' in html
             assert "bootMode === 'off'" not in html
+
+            # 4. End-to-end handoff: inline bootstrap runs BEFORE eager i18n module
+            # Must maintain correct direction across all intermediate and final states
+            handoff_script = """
+            const fs = require('fs');
+            const vm = require('vm');
+            const i18nSrc = fs.readFileSync(process.argv[1], 'utf8');
+
+            function runHandoffTest(serverBootMode, initialStorage = {}, locale = 'fa') {
+              const storage = { 'hermes-lang': locale, ...initialStorage };
+              const classes = new Set();
+              const doc = {
+                documentElement: {
+                  lang: '',
+                  classList: {
+                    add: (c) => classes.add(c),
+                    remove: (c) => classes.delete(c),
+                    contains: (c) => classes.has(c)
+                  },
+                  setAttribute: () => {},
+                  removeAttribute: () => {}
+                },
+                querySelectorAll: () => []
+              };
+              const win = {
+                document: doc,
+                window: null,
+                localStorage: {
+                  getItem: (k) => storage[k] !== undefined ? storage[k] : null,
+                  setItem: (k, v) => { storage[k] = String(v); },
+                  removeItem: (k) => { delete storage[k]; }
+                }
+              };
+              win.window = win;
+              doc.defaultView = win;
+              vm.createContext(win);
+
+              // Step A: Run rendered inline bootstrap (with bootMode injected)
+              const bootMode = serverBootMode;
+              if (['auto', 'on', 'off'].includes(bootMode)) {
+                win._serverRtlMode = bootMode;
+              }
+              var serverMode = bootMode || ((win._serverRtlMode) || null);
+              var mode = serverMode || win.localStorage.getItem('hermes-rtl-mode');
+              var legacy = win.localStorage.getItem('hermes-rtl');
+              if (!mode && legacy === 'true') {
+                mode = 'on';
+              }
+              if (mode === 'on') {
+                doc.documentElement.classList.add('chat-content-rtl');
+              } else if (mode === 'off') {
+                doc.documentElement.classList.remove('chat-content-rtl');
+              } else {
+                var lang = win.localStorage.getItem('hermes-lang') || 'en';
+                if (lang === 'fa') {
+                  doc.documentElement.classList.add('chat-content-rtl');
+                }
+              }
+              const stepAHasRtl = classes.has('chat-content-rtl');
+
+              // Step B: Eager load i18n.js (which invokes loadLocale() immediately at import)
+              vm.runInContext(i18nSrc, win);
+              const stepBHasRtl = classes.has('chat-content-rtl');
+
+              return { stepAHasRtl, stepBHasRtl };
+            }
+
+            // 1. Persian, persisted off, empty cache -> LTR at step A and LTR at step B
+            const c1 = runHandoffTest('off', {}, 'fa');
+            const case1Ok = !c1.stepAHasRtl && !c1.stepBHasRtl;
+
+            // 2. Persian, persisted off, cached on -> LTR at step A and LTR at step B
+            const c2 = runHandoffTest('off', { 'hermes-rtl-mode': 'on' }, 'fa');
+            const case2Ok = !c2.stepAHasRtl && !c2.stepBHasRtl;
+
+            // 3. English, persisted on, cached off -> RTL at step A and RTL at step B
+            const c3 = runHandoffTest('on', { 'hermes-rtl-mode': 'off' }, 'en');
+            const case3Ok = c3.stepAHasRtl && c3.stepBHasRtl;
+
+            // 4. Persian, persisted auto, cached off -> RTL at step A and RTL at step B
+            const c4 = runHandoffTest('auto', { 'hermes-rtl-mode': 'off' }, 'fa');
+            const case4Ok = c4.stepAHasRtl && c4.stepBHasRtl;
+
+            // 5. English, persisted auto, cached on -> LTR at step A and LTR at step B
+            const c5 = runHandoffTest('auto', { 'hermes-rtl-mode': 'on' }, 'en');
+            const case5Ok = !c5.stepAHasRtl && !c5.stepBHasRtl;
+
+            process.stdout.write(JSON.stringify({
+              case1Ok, case2Ok, case3Ok, case4Ok, case5Ok
+            }));
+            """
+            proc = subprocess.run(["node", "-e", handoff_script, str(I18N)], check=True, capture_output=True, text=True)
+            handoff_res = json.loads(proc.stdout)
+            for k, v in handoff_res.items():
+                assert v is True, f"Handoff assertion failed for {k}"
         finally:
             cfg.SETTINGS_FILE = orig

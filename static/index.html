@@ -112,6 +112,9 @@
       try{
         var bootMode = __BOOT_RTL_MODE_VALUE__;
         if (!['auto', 'on', 'off'].includes(bootMode)) bootMode = null;
+        if (bootMode) {
+          window._serverRtlMode = bootMode;
+        }
         var serverMode = bootMode || ((window._serverRtlMode) || null);
         var mode = serverMode || localStorage.getItem('hermes-rtl-mode');
         var legacy = localStorage.getItem('hermes-rtl');
