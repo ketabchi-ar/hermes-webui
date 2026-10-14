@@ -11471,6 +11471,7 @@ _SETTINGS_LEGACY_DROP_KEYS = {
     "default_model",
     "activity_feed_expanded_default",
     "simplified_tool_calling",
+    "_rtl_mode_synthesized",
 }
 _COMPOSER_CONTROL_ORDER_KEYS = {
     key for key in _SETTINGS_DEFAULTS if key.startswith("hide_composer_")
@@ -11575,7 +11576,7 @@ def _settings_payload_for_write(settings: dict, persisted_speech_keys: set[str])
     persisted = {
         k: v
         for k, v in settings.items()
-        if k not in {"default_model", _SETTINGS_PERSISTED_SPEECH_KEYS_FIELD}
+        if k not in {"default_model", _SETTINGS_PERSISTED_SPEECH_KEYS_FIELD, "_rtl_mode_synthesized"}
     }
     for speech_key in _SETTINGS_SPEECH_KEYS:
         if speech_key not in persisted_speech_keys:
@@ -12023,6 +12024,7 @@ def save_settings(settings: dict) -> dict:
     if "default_workspace" in current:
         DEFAULT_WORKSPACE = resolve_default_workspace(current["default_workspace"])
     current["default_model"] = get_effective_default_model()
+    current.pop("_rtl_mode_synthesized", None)
     return current
 
 

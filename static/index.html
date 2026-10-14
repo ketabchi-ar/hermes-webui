@@ -110,9 +110,9 @@
     // RTL users don't see an LTR flash on initial load.
     (function(){
       try{
-        var bootMode = "__BOOT_RTL_MODE_JSON__";
-        if (bootMode === '__BOOT_RTL_MODE_JSON__' || !bootMode) bootMode = null;
-        var serverMode = (typeof bootMode === 'string' && ['auto','on','off'].includes(bootMode)) ? bootMode : ((window._serverRtlMode) || null);
+        var bootMode = __BOOT_RTL_MODE_VALUE__;
+        if (!['auto', 'on', 'off'].includes(bootMode)) bootMode = null;
+        var serverMode = bootMode || ((window._serverRtlMode) || null);
         var mode = serverMode || localStorage.getItem('hermes-rtl-mode');
         var legacy = localStorage.getItem('hermes-rtl');
         if (!mode && legacy === 'true') {

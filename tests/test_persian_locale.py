@@ -331,6 +331,14 @@ def test_composed_hydration_language_payload_coherence():
             loaded = load_settings()
             assert loaded["rtl"] is True
             assert loaded["rtl_mode"] == "on"
+
+            # (h) _rtl_mode_synthesized does not reach disk and does not survive save/load
+            save_settings({"rtl_mode": "on", "rtl": True})
+            with open(settings_file, "r", encoding="utf-8") as f:
+                disk_content = json.load(f)
+            assert "_rtl_mode_synthesized" not in disk_content
+            loaded = load_settings()
+            assert "_rtl_mode_synthesized" not in loaded
         finally:
             cfg.SETTINGS_FILE = orig_file
 
@@ -593,3 +601,23 @@ def test_composed_hydration_language_payload_coherence():
     res = json.loads(proc.stdout)
     for k, v in res.items():
         assert v is True, f"Assertion failed for {k}"
+
+    # 3. Test rendered shell bootstrap injection in routes.py
+    from api.routes import _render_index_shell_base
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmpdir:
+        fake_settings = pathlib.Path(tmpdir) / "settings.json"
+        orig = cfg.SETTINGS_FILE
+        cfg.SETTINGS_FILE = fake_settings
+        try:
+            # Server off with empty cache paints LTR
+            save_settings({"rtl_mode": "off", "rtl": False})
+            _boot_cfg = load_settings()
+            _boot_rtl = _boot_cfg.get("rtl_mode") if not _boot_cfg.get("_rtl_mode_synthesized") else None
+            html = _render_index_shell_base().replace(
+                "__BOOT_RTL_MODE_VALUE__", json.dumps(_boot_rtl)
+            )
+            assert 'var bootMode = "off";' in html
+            assert "bootMode === 'off'" not in html
+        finally:
+            cfg.SETTINGS_FILE = orig
