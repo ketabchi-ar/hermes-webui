@@ -337,8 +337,10 @@ def test_composed_hydration_language_payload_coherence():
             with open(settings_file, "r", encoding="utf-8") as f:
                 disk_content = json.load(f)
             assert "_rtl_mode_synthesized" not in disk_content
+            assert disk_content.get("rtl_mode") == "on"
             loaded = load_settings()
             assert "_rtl_mode_synthesized" not in loaded
+            assert loaded["rtl_mode"] == "on"
         finally:
             cfg.SETTINGS_FILE = orig_file
 
@@ -610,15 +612,43 @@ def test_composed_hydration_language_payload_coherence():
         orig = cfg.SETTINGS_FILE
         cfg.SETTINGS_FILE = fake_settings
         try:
+            from api.routes import _INDEX_SHELL_CACHE
+            _INDEX_SHELL_CACHE.clear()
             # Server off with empty cache paints LTR
             save_settings({"rtl_mode": "off", "rtl": False})
             _boot_cfg = load_settings()
-            _boot_rtl = _boot_cfg.get("rtl_mode") if not _boot_cfg.get("_rtl_mode_synthesized") else None
+            assert not _boot_cfg.get("_rtl_mode_synthesized")
+            assert _boot_cfg.get("rtl_mode") == "off"
+            _raw_rtl = _boot_cfg.get("rtl_mode")
+            _boot_rtl = _raw_rtl if (not _boot_cfg.get("_rtl_mode_synthesized") and _raw_rtl in ("on", "off", "auto")) else None
+            _boot_rtl_json = json.dumps(_boot_rtl).replace("<", "\\u003c")
             html = _render_index_shell_base().replace(
-                "__BOOT_RTL_MODE_VALUE__", json.dumps(_boot_rtl)
+                "__BOOT_RTL_MODE_VALUE__", _boot_rtl_json
             )
             assert 'var bootMode = "off";' in html
             assert "bootMode === 'off'" not in html
+
+            # Verify crafted rtl_mode in settings.json does NOT interpolate raw script tag
+            with open(fake_settings, "w", encoding="utf-8") as f:
+                json.dump({"rtl_mode": "</script><script>window.__injected=1</script>"}, f)
+            _boot_cfg2 = load_settings()
+            _raw_rtl2 = _boot_cfg2.get("rtl_mode")
+            _boot_rtl2 = _raw_rtl2 if (not _boot_cfg2.get("_rtl_mode_synthesized") and _raw_rtl2 in ("on", "off", "auto")) else None
+            _boot_rtl2_json = json.dumps(_boot_rtl2).replace("<", "\\u003c")
+            html2 = _render_index_shell_base().replace(
+                "__BOOT_RTL_MODE_VALUE__", _boot_rtl2_json
+            )
+            assert "</script>" not in html2.split('var bootMode = ')[1].split(';')[0]
+            assert "null" in html2.split('var bootMode = ')[1].split(';')[0]
+
+            # Verify unrelated save (e.g. theme) does NOT write synthesized rtl_mode to disk
+            with open(fake_settings, "w", encoding="utf-8") as f:
+                json.dump({"language": "en", "rtl": False, "theme": "dark"}, f)
+            save_settings({"theme": "light"})
+            with open(fake_settings, "r", encoding="utf-8") as f:
+                disk_unrelated = json.load(f)
+            assert "rtl_mode" not in disk_unrelated
+            assert disk_unrelated.get("theme") == "light"
 
             # 4. End-to-end handoff: inline bootstrap runs BEFORE eager i18n module
             # Must maintain correct direction across all intermediate and final states

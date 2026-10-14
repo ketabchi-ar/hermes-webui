@@ -13610,11 +13610,13 @@ def handle_get(handler, parsed) -> bool:
             # only the per-session CSRF token and per-request extension tags are
             # applied here (see _render_index_shell_base).
             _boot_cfg = load_settings()
-            _boot_rtl = _boot_cfg.get("rtl_mode") if not _boot_cfg.get("_rtl_mode_synthesized") else None
+            _raw_rtl = _boot_cfg.get("rtl_mode")
+            _boot_rtl = _raw_rtl if (not _boot_cfg.get("_rtl_mode_synthesized") and _raw_rtl in ("on", "off", "auto")) else None
+            _boot_rtl_json = json.dumps(_boot_rtl).replace("<", "\\u003c")
             html = _render_index_shell_base().replace(
                 "__CSRF_TOKEN_JSON__", json.dumps(csrf_token)
             ).replace(
-                "__BOOT_RTL_MODE_VALUE__", json.dumps(_boot_rtl)
+                "__BOOT_RTL_MODE_VALUE__", _boot_rtl_json
             )
             return t(
                 handler,

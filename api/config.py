@@ -11578,6 +11578,8 @@ def _settings_payload_for_write(settings: dict, persisted_speech_keys: set[str])
         for k, v in settings.items()
         if k not in {"default_model", _SETTINGS_PERSISTED_SPEECH_KEYS_FIELD, "_rtl_mode_synthesized"}
     }
+    if settings.get("_rtl_mode_synthesized"):
+        persisted.pop("rtl_mode", None)
     for speech_key in _SETTINGS_SPEECH_KEYS:
         if speech_key not in persisted_speech_keys:
             persisted.pop(speech_key, None)
@@ -11587,11 +11589,9 @@ def _settings_payload_for_write(settings: dict, persisted_speech_keys: set[str])
 def load_settings() -> dict:
     """Load settings from disk, merging with defaults for any missing keys."""
     settings = dict(_SETTINGS_DEFAULTS)
-    settings["_rtl_mode_synthesized"] = True
     stored = _read_raw_settings_file()
-    if isinstance(stored, dict):
-        if "rtl_mode" in stored:
-            settings.pop("_rtl_mode_synthesized", None)
+    if not (isinstance(stored, dict) and "rtl_mode" in stored):
+        settings["_rtl_mode_synthesized"] = True
     if isinstance(stored, dict):
         if (
             "worklog_details_expanded_default" not in stored
@@ -11653,6 +11653,8 @@ def load_settings() -> dict:
             if stored.get("rtl") is True:
                 settings["rtl_mode"] = "on"
                 settings.pop("_rtl_mode_synthesized", None)
+            else:
+                settings["_rtl_mode_synthesized"] = True
     # Fall back to the DEFAULTS, not to None, when nothing is stored.
     #
     # `_read_raw_settings_file()` returns {} for a MISSING settings.json, and {}
@@ -11879,6 +11881,7 @@ def save_settings(settings: dict) -> dict:
     settings.pop("simplified_tool_calling", None)
     if "rtl" in settings and settings.get("rtl_mode") not in _SETTINGS_ENUM_VALUES["rtl_mode"]:
         settings["rtl_mode"] = "on" if bool(settings["rtl"]) else "off"
+        current.pop("_rtl_mode_synthesized", None)
     pending_theme = current.get("theme")
     pending_skin = current.get("skin")
     theme_was_explicit = False
@@ -11988,6 +11991,8 @@ def save_settings(settings: dict) -> dict:
             # Coerce bool keys
             if k in _SETTINGS_BOOL_KEYS:
                 v = bool(v)
+            if k == "rtl_mode":
+                current.pop("_rtl_mode_synthesized", None)
             current[k] = v
             if key_is_speech:
                 applied_speech_keys.add(k)
@@ -12024,7 +12029,6 @@ def save_settings(settings: dict) -> dict:
     if "default_workspace" in current:
         DEFAULT_WORKSPACE = resolve_default_workspace(current["default_workspace"])
     current["default_model"] = get_effective_default_model()
-    current.pop("_rtl_mode_synthesized", None)
     return current
 
 
