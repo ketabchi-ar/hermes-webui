@@ -338,6 +338,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -1235,6 +1236,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Clear all messages in this conversation',
     // Settings detail
     settings_label_rtl: 'Right-to-left chat layout',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Flips alignment of chat messages and the composer input for languages like Arabic or Hebrew. Affects only the chat area — sidebar and other panels stay left-to-right.',
     settings_label_sound: 'Notification sound',
     settings_desc_sound: 'Play a sound when the assistant finishes a response.',
@@ -2205,6 +2209,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -3045,6 +3050,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Cancella tutti i messaggi in questa conversazione',
     // Settings detail
     settings_label_rtl: 'Layout chat da destra a sinistra',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: "Inverte l'allineamento dei messaggi e dell'input del compositore per lingue come arabo o ebraico. Influisce solo sull'area chat — la barra laterale e gli altri pannelli rimangono da sinistra a destra.",
     settings_label_sound: 'Suono notifica',
     settings_desc_sound: 'Riproduci un suono quando l\'assistente termina una risposta.',
@@ -4010,6 +4018,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: '有効にすると、別のワークスペースを選択したときにそのワークスペースに紐づく新しい会話を開始し、現在のチャットは元のワークスペースに残ります。ワークスペースをまたいだ古いコンテキストが混入するのを防げます。無効の場合（既定）、ワークスペースを切り替えると現在のワークスペースがその場で変更されます。',
     workspace_switched_new_chat: '{0} で新しいチャットを開始しました',
     settings_desc_busy_placeholder_hint: 'セッションが実行中で入力欄が空のときに、現在の実行中タスクをプレースホルダーとして表示します。',
+    composer_placeholder: '{0} にメッセージを送信…',
     composer_placeholder_busy_queue: 'Enter = キュー登録 | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = 割り込み | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = 割り込み操作 | /queue | /background | /interrupt',
@@ -4855,6 +4864,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'この会話のすべてのメッセージをクリア',
     // Settings detail
     settings_label_rtl: 'チャットの右から左へのレイアウト',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'アラビア語やヘブライ語のような言語向けに、チャットメッセージとコンポーザー入力の配置を反転します。チャット領域のみに影響し、サイドバーや他のパネルは左から右のままです。',
     settings_label_sound: '通知音',
     settings_desc_sound: 'アシスタントが応答を完了したときに音を鳴らします。',
@@ -5762,6 +5774,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'Когда включено, выбор другого рабочего пространства начинает новую беседу, привязанную к нему, и оставляет текущий чат в исходном рабочем пространстве, чтобы избежать устаревшего межпространственного контекста. Когда выключено (по умолчанию), смена рабочего пространства меняет его в текущем чате.',
     workspace_switched_new_chat: 'Начат новый чат в {0}',
     settings_desc_busy_placeholder_hint: 'Когда сеанс занят, а черновик пуст, поле ввода показывает подсказку с текущим действием.',
+    composer_placeholder: 'Сообщение для {0}…',
     composer_placeholder_busy_queue: 'Enter = очередь | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = прервать | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = правка | /queue | /background | /interrupt',
@@ -6311,6 +6324,9 @@ const LOCALES = {
     import_session_json_tooltip: 'Импортировать сессию из JSON',
     clear_conversation_btn_tooltip: 'Очистить все сообщения в этой беседе',
     settings_label_rtl: 'Раскладка чата справа налево',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Переворачивает выравнивание сообщений чата и поля ввода для языков вроде арабского или иврита. Влияет только на область чата — боковая панель и другие панели остаются слева направо.',
     settings_label_sound: 'Звук уведомления',
     settings_desc_sound: 'Проигрывать звук, когда помощник завершает ответ.',
@@ -7593,6 +7609,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -8080,6 +8097,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Borrar todos los mensajes de esta conversación',
     // Settings detail
     settings_label_rtl: 'Diseño de chat de derecha a izquierda',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Invierte la alineación de los mensajes y la entrada del compositor para idiomas como árabe o hebreo. Afecta solo al área del chat — la barra lateral y otros paneles siguen de izquierda a derecha.',
     settings_label_sound: 'Sonido de notificación',
     settings_desc_sound: 'Reproduce un sonido cuando el asistente termina una respuesta.',
@@ -9313,6 +9333,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -9797,6 +9818,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Alle Nachrichten in dieser Konversation löschen',
     // Settings detail
     settings_label_rtl: 'Chat-Layout von rechts nach links',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Kehrt die Ausrichtung von Chat-Nachrichten und Eingabefeld für Sprachen wie Arabisch oder Hebräisch um. Betrifft nur den Chat-Bereich — Seitenleiste und andere Panels bleiben von links nach rechts.',
     settings_label_sound: 'Benachrichtigungston',
     settings_desc_sound: 'Spielt einen Ton ab, wenn der Assistent eine Antwort beendet.',
@@ -11088,6 +11112,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: '开启此功能后，选择不同的工作区会开启一个与该工作区绑定的全新对话，你当前的聊天则保留在原工作区，避免出现过时的跨工作区上下文。关闭此功能（默认状态）后，切换工作区会直接更改当前工作区。 ',
     workspace_switched_new_chat: '在{0}中开始了新的聊天',
     settings_desc_busy_placeholder_hint: '在会话运行且草稿为空时，显示带有当前忙碌操作的编辑器占位符。',
+    composer_placeholder: '向 {0} 发送消息…',
     composer_placeholder_busy_queue: 'Enter = 队列 | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = 中断 | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = 引导 | /queue | /background | /interrupt',
@@ -11677,6 +11702,9 @@ const LOCALES = {
     password_env_var_locked_placeholder: '已锁定：已设置 HERMES_WEBUI_PASSWORD 环境变量',
     disable_auth: '停用认证',
     settings_label_rtl: '从右到左聊天布局',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: '为阿拉伯语或希伯来语等语言翻转聊天消息和编辑器输入的对齐方式。仅影响聊天区域 — 侧边栏和其他面板保持从左到右。',
     settings_label_sound: '通知声音',
     settings_label_notifications: '浏览器通知',
@@ -12839,6 +12867,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -13681,6 +13710,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: '清空此對話中的所有訊息',
     // Settings detail
     settings_label_rtl: '從右到左聊天版面',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: '為阿拉伯語或希伯來語等語言翻轉聊天訊息和編輯器輸入的對齊方式。僅影響聊天區域 — 側邊欄和其他面板保持從左到右。',
     settings_label_sound: '通知聲音',
     settings_desc_sound: '助理完成回覆時播放音效。',
@@ -14571,6 +14603,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -15327,6 +15360,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Limpar todas as mensagens nesta conversa',
     // Settings detail
     settings_label_rtl: 'Layout de chat da direita para a esquerda',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Inverte o alinhamento das mensagens do chat e da entrada do compositor para idiomas como árabe ou hebraico. Afeta apenas a área do chat — a barra lateral e outros painéis permanecem da esquerda para a direita.',
     settings_label_sound: 'Som de notificação',
     settings_desc_sound: 'Tocar som quando assistente finalizar resposta.',
@@ -16258,6 +16294,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -17029,6 +17066,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: '이 대화의 모든 메시지 지우기',
     // Settings detail
     settings_label_rtl: '오른쪽에서 왼쪽 채팅 레이아웃',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: '아랍어나 히브리어 같은 언어를 위해 채팅 메시지와 작성 입력의 정렬을 뒤집습니다. 채팅 영역에만 영향을 주며, 사이드바와 다른 패널은 왼쪽에서 오른쪽으로 유지됩니다.',
     settings_label_sound: '알림음',
     settings_desc_sound: 'Assistant 응답이 끝나면 소리를 재생합니다.',
@@ -18057,6 +18097,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -18896,6 +18937,9 @@ const LOCALES = {
     import_session_json_tooltip: 'Importer une session depuis JSON',
     clear_conversation_btn_tooltip: 'Effacer tous les messages de cette conversation',
     settings_label_rtl: 'Disposition du chat de droite à gauche',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Inverse l\'alignement des messages du chat et de la saisie du compositeur pour les langues comme l\'arabe ou l\'hébreu. N\'affecte que la zone de chat — la barre latérale et les autres panneaux restent de gauche à droite.',
     settings_label_sound: 'Son de notification',
     settings_desc_sound: 'Jouer un son lorsque l\'assistant termine une réponse.',
@@ -20800,6 +20844,7 @@ const LOCALES = {
     show_earlier_steps: 'Show {0} earlier steps',
     command_label: 'Příkaz',
     composer_placeholder_busy_interrupt: 'Enter = přerušení | /queue | /background | /steer',
+    composer_placeholder: 'Zpráva pro {0}…',
     composer_placeholder_busy_queue: 'Enter = fronta | /interrupt | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = řízení | /queue | /background | /interrupt',
     compress_complete_label: 'Komprese dokončena',
@@ -21091,6 +21136,9 @@ const LOCALES = {
     settings_label_max_tokens: 'Maximální výstupní tokeny',
     settings_label_model: 'Výchozí model',
     settings_label_rtl: 'Rozložení chatu zprava doleva',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_label_send_key: 'Klávesa pro odeslání',
     settings_label_theme: 'Motiv',
     settings_placeholder_max_tokens_fallback: 'Bez přepsání (výchozí: {0})',
@@ -21616,6 +21664,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -22384,6 +22433,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Bu görüşmedeki tüm mesajları temizle',
     // Settings detail
     settings_label_rtl: 'Sağdan sola sohbet düzeni',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Arapça veya İbranice gibi diller için sohbet mesajlarının ve besteci girişinin hizalamasını değiştirir. Yalnızca sohbet alanını etkiler; kenar çubuğu ve diğer paneller soldan sağa kalır.',
     settings_label_sound: 'Bildirim sesi',
     settings_desc_sound: 'Asistan bir yanıtı bitirdiğinde bir ses çalın.',
@@ -23407,6 +23459,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -24242,6 +24295,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Wyczyść wszystkie wiadomości w tej konwersacji',
     // Settings detail
     settings_label_rtl: 'Układ czatu od prawej do lewej',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Odwraca wyrównanie wiadomości czatu i pola wprowadzania dla języków takich jak arabski czy hebrajski. Wpływa tylko na obszar czatu — pasek boczny i inne panele pozostają wyrównane od lewej do prawej.',
     settings_label_sound: 'Dźwięk powiadomienia',
     settings_desc_sound: 'Odtwórz dźwięk, gdy asystent zakończy generowanie odpowiedzi.',
@@ -25183,6 +25239,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: 'When on, selecting a different workspace starts a fresh conversation bound to that workspace and leaves your current chat on its original workspace, avoiding stale cross-workspace context. When off (default), switching workspace changes the current workspace in place.',
     workspace_switched_new_chat: 'Started a new chat in {0}',
     settings_desc_busy_placeholder_hint: 'Shows the composer placeholder with the current busy action while the session is running and the draft is empty.',
+    composer_placeholder: 'Message {0}…',
     composer_placeholder_busy_queue: 'Enter = queue | /interrupt | /background | /steer',
     composer_placeholder_busy_interrupt: 'Enter = interrupt | /queue | /background | /steer',
     composer_placeholder_busy_steer: 'Enter = steer | /queue | /background | /interrupt',
@@ -25886,6 +25943,9 @@ const LOCALES = {
     clear_conversation_btn_tooltip: 'Xóa toàn bộ tin nhắn trong cuộc trò chuyện này',
     // Settings detail
     settings_label_rtl: 'Bố cục chat từ phải sang trái',
+    settings_option_rtl_auto: 'Auto: follow language',
+    settings_option_rtl_on: 'Always RTL',
+    settings_option_rtl_off: 'Always LTR',
     settings_desc_rtl: 'Đảo hướng căn chỉnh tin nhắn chat và ô nhập cho các ngôn ngữ như Arabic hoặc Hebrew. Chỉ ảnh hưởng vùng chat — sidebar và các panel khác vẫn giữ trái sang phải.',
     settings_label_sound: 'Âm thanh thông báo',
     settings_desc_sound: 'Phát âm thanh khi assistant hoàn tất phản hồi.',
@@ -26981,6 +27041,7 @@ const LOCALES = {
     settings_desc_new_chat_on_workspace_switch: "با فعال‌سازی، انتخاب فضای کاری جدید گفتگوی تازه‌ای در همان فضا باز می‌کند و چت فعلی را دست‌نخورده نگه می‌دارد.",
     workspace_switched_new_chat: 'گفتگوی جدید در {0} شروع شد',
     settings_desc_busy_placeholder_hint: "نمایش کلیدهای میانبر در کادر ورودی هنگامی که ایجنت در حال اجرای دستور است.",
+    composer_placeholder: "پیام به {0}…",
     composer_placeholder_busy_queue: "Enter = صف‌بندی | /interrupt | /background | /steer",
     composer_placeholder_busy_interrupt: "Enter = توقف و ارسال | /queue | /background | /steer",
     composer_placeholder_busy_steer: "Enter = اصلاح درجا | /queue | /background | /interrupt",
@@ -27256,12 +27317,12 @@ const LOCALES = {
     settings_label_transparent_stream_event_timestamps: "نمایش برچسب‌های زمانی در جریان شفاف",
     settings_desc_transparent_stream_event_timestamps: "زمان درج‌شده در پایین پاسخ را نگه می‌دارد و برچسب‌های زمانی تک‌تک رویدادها را پنهان می‌کند.",
     first_token_time: "زمان تا اولین توکن",
-    processed_elapsed: _i18nProcessedElapsedEn,
+    processed_elapsed: _i18nProcessedElapsedFa,
     worklog_thinking: "در حال تفکر",
     tool_target_skill_suffix: 'مهارت',
-    tool_action_label: _i18nToolActionLabelEn,
-    tool_worklog_summary: _i18nToolWorklogSummaryEn,
-    tool_summary_join: _i18nToolSummaryJoinEn,
+    tool_action_label: _i18nToolActionLabelFa,
+    tool_worklog_summary: _i18nToolWorklogSummaryFa,
+    tool_summary_join: _i18nToolSummaryJoinFa,
     done: "انجام شد",
     settings_option_compact_worklog: "گزارش کاری فشرده (Worklog)",
     settings_option_transparent_stream: "جریان شفاف و زنده (Stream)",
@@ -27668,6 +27729,9 @@ const LOCALES = {
     import_session_json_tooltip: 'وارد کردن نشست از فایل JSON',
     clear_conversation_btn_tooltip: 'پاک کردن تمام پیام‌های این گفتگو',
     settings_label_rtl: "چیدمان راست‌به‌چپ چت",
+    settings_option_rtl_auto: "خودکار: هماهنگ با زبان",
+    settings_option_rtl_on: "همیشه راست‌به‌چپ (RTL)",
+    settings_option_rtl_off: "همیشه چپ‌به‌راست (LTR)",
     settings_desc_rtl: "راست‌چین‌سازی پیام‌های گفتگو و کادر ورودی برای زبان‌هایی مثل فارسی، عربی یا عبری. فقط بر ناحیه چت اثر می‌گذارد و نوار کناری دست‌نخورده می‌ماند.",
     settings_label_sound: "صدای اعلان",
     settings_desc_sound: "پخش صدا هنگامی که پاسخ دستیار به پایان می‌رسد.",
@@ -28726,6 +28790,49 @@ function _i18nToolSummaryJoinCs(parts) {
   return Array.isArray(parts) ? parts.filter(Boolean).join(', ') : '';
 }
 
+// Persian (fa) tool/worklog helpers
+const _I18N_TOOL_ACTION_TEXT_FA = {
+    shell: { running: 'در حال اجرای', done: 'اجرای', fail: 'اجرای', fallback: 'یک دستور' },
+    read: { running: 'در حال خواندن', done: 'خواندن', fail: 'خواندن', fallback: 'یک فایل' },
+    list: { running: 'در حال فهرست کردن', done: 'فهرست کردن', fail: 'فهرست کردن', fallback: 'فایل‌ها' },
+    search: { running: 'در حال جستجو در', done: 'جستجو در', fail: 'جستجو در', fallback: 'فضای کاری' },
+    web: { running: 'در حال بررسی', done: 'بررسی', fail: 'بررسی', fallback: 'داده‌های وب' },
+    write: { running: 'در حال به‌روزرسانی', done: 'به‌روزرسانی', fail: 'به‌روزرسانی', fallback: 'یک فایل' },
+    skill: { running: 'در حال بارگذاری', done: 'بارگذاری', fail: 'بارگذاری', fallback: 'یک مهارت' },
+    memory: { running: 'در حال ذخیره', done: 'ذخیره', fail: 'ذخیره', fallback: 'حافظه' },
+    delegate: { running: 'در حال واگذاری', done: 'واگذاری', fail: 'واگذاری', fallback: 'یک وظیفه' },
+    unknown: { running: 'در حال اجرای', done: 'اجرای', fail: 'اجرای', fallback: 'یک ابزار' },
+};
+const _I18N_TOOL_SUMMARY_TEXT_FA = {
+    shell: { running: ['در حال اجرای یک دستور', 'در حال اجرای {n} دستور'], done: ['اجرای یک دستور', 'اجرای {n} دستور'] },
+    read: { running: ['در حال خواندن یک فایل', 'در حال خواندن {n} فایل'], done: ['خواندن یک فایل', 'خواندن {n} فایل'] },
+    list: { running: ['در حال فهرست کردن فایل‌ها', 'در حال فهرست کردن {n} مورد'], done: ['فهرست کردن فایل‌ها', 'فهرست کردن {n} فایل'] },
+    search: { running: ['در حال جستجو در فضای کاری', 'در حال جستجو در فضای کاری ({n} بار)'], done: ['جستجو در فضای کاری', '{n} بار جستجو در فضای کاری'] },
+    web: { running: ['در حال بررسی وب', 'در حال بررسی وب ({n} بار)'], done: ['بررسی وب', '{n} بار بررسی وب'] },
+    write: { running: ['در حال به‌روزرسانی یک فایل', 'در حال به‌روزرسانی {n} فایل'], done: ['به‌روزرسانی یک فایل', 'به‌روزرسانی {n} فایل'] },
+    skill: { running: ['در حال بارگذاری یک مهارت', 'در حال بارگذاری {n} مهارت'], done: ['بارگذاری یک مهارت', 'بارگذاری {n} مهارت'] },
+    memory: { running: ['در حال ذخیره در حافظه', 'در حال ذخیره {n} مورد در حافظه'], done: ['ذخیره در حافظه', 'ذخیره {n} مورد در حافظه'] },
+    delegate: { running: ['در حال واگذاری وظیفه', 'در حال واگذاری {n} وظیفه'], done: ['واگذاری وظیفه', 'واگذاری {n} وظیفه'] },
+    unknown: { running: ['در حال اجرای یک ابزار', 'در حال اجرای {n} ابزار'], done: ['اجرای یک ابزار', 'اجرای {n} ابزار'] },
+};
+function _i18nProcessedElapsedFa(duration) {
+  return _i18nProcessedElapsed('پردازش‌شده', duration);
+}
+function _i18nToolActionLabelFa(kind, state, target, display, failed) {
+  const verbs = _I18N_TOOL_ACTION_TEXT_FA[kind] || _I18N_TOOL_ACTION_TEXT_FA.unknown;
+  const object = target || verbs.fallback || display || 'ابزار';
+  if (failed) return `ناموفق در ${verbs.fail || 'اجرای'} ${object}`;
+  return `${verbs[state] || verbs.running} ${object}`;
+}
+function _i18nToolWorklogSummaryFa(kind, state, count) {
+  return _i18nToolWorklogSummaryFromMap(_I18N_TOOL_SUMMARY_TEXT_FA, kind, state, count);
+}
+function _i18nToolSummaryJoinFa(parts) {
+  const items = Array.isArray(parts) ? parts.filter(Boolean) : [];
+  if (items.length <= 1) return items[0] || '';
+  return items.join('، ');
+}
+
 
 
 // Active locale — defaults to English; overridden by loadLocale() at boot.
@@ -28884,6 +28991,7 @@ function applyLocaleToDOM() {
   });
   if (typeof syncWorkspacePanelUI === 'function') syncWorkspacePanelUI();
   if (typeof syncAppTitlebar === 'function') syncAppTitlebar();
+  if (typeof _applyBusyComposerPlaceholder === 'function') _applyBusyComposerPlaceholder();
 }
 
 // Apply saved locale immediately so there's no flash of English on reload.

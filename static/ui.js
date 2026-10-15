@@ -8438,7 +8438,9 @@ function _applyBusyComposerPlaceholder(){
   if(_compressionPlaceholderSaved!==null) return;
   if(input.disabled) return;
   if(_composerHasContent()) return;
-  const idlePlaceholder='Message '+assistantDisplayName()+'\u2026';
+  const idlePlaceholder = (typeof t === 'function' && t('composer_placeholder'))
+    ? (typeof t('composer_placeholder') === 'function' ? t('composer_placeholder')(assistantDisplayName()) : t('composer_placeholder').replace('{0}', assistantDisplayName()))
+    : ('Message ' + assistantDisplayName() + '\u2026');
   if(!window._showBusyPlaceholderHint||!S.busy){
     input.placeholder=idlePlaceholder;
     return;
@@ -17477,7 +17479,7 @@ function renderMessages(options){
     const _fmtSv=(typeof _formatInServerTz==='function')?_formatInServerTz:null;
     const tsTitle=tsVal?(_fmtSv?_fmtSv(new Date(tsVal*1000),{}):new Date(tsVal*1000).toLocaleString()):'';
     const tsTime=_formatMessageFooterTimestamp(tsVal);
-    const timeHtml = tsTime ? `<span class="msg-time" title="${esc(tsTitle)}">${tsTime}</span>` : '';
+    const timeHtml = tsTime ? `<span class="msg-time" title="${esc(tsTitle)}"><bdi>${tsTime}</bdi></span>` : '';
     // #3114: show jump-to-question on every assistant message that has a
     // resolvable question target, not just the turn-final one. Multi-step
     // turns (tool_call -> assistant -> tool_call -> assistant) otherwise

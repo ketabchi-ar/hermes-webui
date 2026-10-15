@@ -8810,7 +8810,11 @@ function _preferencesPayloadFromUi(){
   const rtlCb=$('settingsRtl');
   if(rtlCb){
     payload.rtl=rtlCb.checked;
-    payload.rtl_mode=window._rtlMode||(localStorage.getItem('hermes-rtl-mode')||'auto');
+    const modeVal = ['auto','on','off'].includes(rtlCb.value) ? rtlCb.value : (window._rtlMode||(localStorage.getItem('hermes-rtl-mode')||'auto'));
+    if (rtlCb.type !== 'checkbox') {
+      payload.rtl = (modeVal === 'on' || (modeVal === 'auto' && ((typeof _locale!=='undefined'&&_locale&&_locale._lang==='fa')||localStorage.getItem('hermes-lang')==='fa')));
+    }
+    payload.rtl_mode = modeVal;
   }
   const notifCb=$('settingsNotificationsEnabled');
   if(notifCb) payload.notifications_enabled=notifCb.checked;
@@ -9378,7 +9382,10 @@ async function loadSettingsPanel(){
         if(typeof setLocale==='function'){setLocale(this.value);if(typeof applyLocaleToDOM==='function')applyLocaleToDOM();}
         const b=$('settingsRtl');
         if(b&&(window._rtlMode||'auto')==='auto'){
-          const a=this.value==='fa';b.checked=a;document.documentElement.classList.toggle('chat-content-rtl',a);
+          const a=this.value==='fa';
+          if(b.type==='checkbox') b.checked=a;
+          else if(b.value==='auto') b.value='auto';
+          document.documentElement.classList.toggle('chat-content-rtl',a);
         }
         _schedulePreferencesAutosave();
       },{once:false});
@@ -9584,12 +9591,23 @@ async function loadSettingsPanel(){
       }
       window._rtlMode = effectiveMode;
       if (serverRtlMode) window._serverRtlMode = serverRtlMode;
-      const saved = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);
-      rtlCb.checked = saved;
-      document.documentElement.classList.toggle('chat-content-rtl', saved);
+      const isRtlActive = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);
+      if (rtlCb.type === 'checkbox') {
+        rtlCb.checked = isRtlActive;
+      } else {
+        rtlCb.value = effectiveMode;
+      }
+      document.documentElement.classList.toggle('chat-content-rtl', isRtlActive);
       rtlCb.addEventListener('change',()=>{
-        const on = rtlCb.checked;
-        const newMode = on ? 'on' : 'off';
+        let newMode, on;
+        if (rtlCb.type === 'checkbox') {
+          on = rtlCb.checked;
+          newMode = on ? 'on' : 'off';
+        } else {
+          newMode = ['auto','on','off'].includes(rtlCb.value) ? rtlCb.value : 'auto';
+          const curLoc = (typeof _locale !== 'undefined' && _locale && _locale._lang) || (typeof resolvePreferredLocale === 'function' ? resolvePreferredLocale() : localStorage.getItem('hermes-lang'));
+          on = newMode === 'on' ? true : (newMode === 'off' ? false : (curLoc === 'fa'));
+        }
         window._rtlMode = newMode;
         try{
           localStorage.setItem('hermes-rtl-mode', newMode);
@@ -12922,7 +12940,12 @@ async function saveSettings(andClose){
   body.whats_new_summary_enabled=!!($('settingsWhatsNewSummary')||{}).checked;
   body.sound_enabled=!!($('settingsSoundEnabled')||{}).checked;
   body.rtl=!!($('settingsRtl')||{}).checked;
-  body.rtl_mode=window._rtlMode||(localStorage.getItem('hermes-rtl-mode')||'auto');
+  const _rtlEl = $('settingsRtl');
+  const _rtlElMode = _rtlEl && ['auto','on','off'].includes(_rtlEl.value) ? _rtlEl.value : (window._rtlMode||(localStorage.getItem('hermes-rtl-mode')||'auto'));
+  if (_rtlEl && _rtlEl.type !== 'checkbox') {
+    body.rtl = (_rtlElMode === 'on' || (_rtlElMode === 'auto' && ((typeof _locale!=='undefined'&&_locale&&_locale._lang==='fa')||localStorage.getItem('hermes-lang')==='fa')));
+  }
+  body.rtl_mode = _rtlElMode;
   body.notifications_enabled=!!($('settingsNotificationsEnabled')||{}).checked;
   body.show_thinking=window._showThinking!==false;
   body.sidebar_density=sidebarDensity;

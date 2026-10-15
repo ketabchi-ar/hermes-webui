@@ -48,7 +48,14 @@ def test_fa_locale_structure_and_rtl():
       remote_image_open: faBundle.remote_image_open,
       project_picker_none: faBundle.project_picker_none,
       project_picker_new: faBundle.project_picker_new,
-      session_new_tab_other_profile: faBundle.session_new_tab_other_profile
+      session_new_tab_other_profile: faBundle.session_new_tab_other_profile,
+      composer_placeholder: faBundle.composer_placeholder,
+      tool_summary_shell_single: faBundle.tool_worklog_summary('shell', 'done', 1),
+      tool_summary_shell_multi: faBundle.tool_worklog_summary('shell', 'done', 3),
+      tool_summary_read_single: faBundle.tool_worklog_summary('read', 'done', 1),
+      tool_summary_search_single: faBundle.tool_worklog_summary('search', 'done', 1),
+      tool_action_label_shell: faBundle.tool_action_label('shell', 'done', 'ls', 'ls', false),
+      processed_elapsed: faBundle.processed_elapsed('2s')
     }));
     """
     proc = subprocess.run(["node", "-e", script, str(I18N)], check=True, capture_output=True, text=True)
@@ -63,6 +70,13 @@ def test_fa_locale_structure_and_rtl():
     assert res["project_picker_none"] == "بدون پروژه"
     assert res["project_picker_new"] == "پروژه جدید..."
     assert res["session_new_tab_other_profile"] == "این نشست متعلق به نمایه دیگری است. در برگه فعلی بازش کنید."
+    assert "پیام به {0}…" in res["composer_placeholder"]
+    assert "اجرای یک دستور" in res["tool_summary_shell_single"]
+    assert "اجرای 3 دستور" in res["tool_summary_shell_multi"]
+    assert "خواندن یک فایل" in res["tool_summary_read_single"]
+    assert "جستجو در فضای کاری" in res["tool_summary_search_single"]
+    assert "اجرای ls" in res["tool_action_label_shell"]
+    assert "پردازش‌شده 2s" in res["processed_elapsed"]
 
 
 def test_sessions_source_placeholders_preserved():
@@ -95,7 +109,7 @@ def test_opening_settings_preserves_persian_auto_rtl():
     assert "const isFaLocale = currentLocale === 'fa';" in panels_src
     assert "let localRtlMode = localStorage.getItem('hermes-rtl-mode');" in panels_src
     assert "window._rtlMode = effectiveMode;" in panels_src
-    assert "const saved = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);" in panels_src
+    assert "const isRtlActive = effectiveMode === 'on' ? true : (effectiveMode === 'off' ? false : isFaLocale);" in panels_src
 
 
 def test_vazirmatn_font_license_exists():
@@ -381,6 +395,7 @@ def test_composed_hydration_language_payload_coherence():
       function makeElem(id = '') {
         return {
           id,
+          type: id === 'settingsRtl' ? 'select' : '',
           parentElement: null,
           checked: false,
           value: '',
@@ -513,21 +528,21 @@ def test_composed_hydration_language_payload_coherence():
       // 1. Legacy local hermes-rtl='false' + language fa, no stored mode -> ambiguous legacy false does NOT turn off auto RTL
       const env1 = setupEnvironment({ 'hermes-rtl': 'false' }, { rtl_mode: 'auto', rtl: false, language: 'fa' });
       await env1.win.loadSettingsPanel();
-      const legacyLocalOffKeepsAutoOn = env1.classes.has('chat-content-rtl') && env1.elements['settingsRtl'].checked;
+      const legacyLocalOffKeepsAutoOn = env1.classes.has('chat-content-rtl') && (env1.elements['settingsRtl'].value === 'auto' || env1.elements['settingsRtl'].checked);
       const p1 = env1.win._preferencesPayloadFromUi();
       const legacyLocalOffPayload = p1.rtl === true && p1.rtl_mode === 'auto';
 
       // 2. Legacy local hermes-rtl='true' + language en -> RTL turns ON
       const env2 = setupEnvironment({ 'hermes-rtl': 'true' }, { language: 'en' });
       await env2.win.loadSettingsPanel();
-      const legacyLocalOnTurnsOn = env2.classes.has('chat-content-rtl') && env2.elements['settingsRtl'].checked;
+      const legacyLocalOnTurnsOn = env1.classes.has('chat-content-rtl') && (env2.elements['settingsRtl'].value === 'on' || env2.elements['settingsRtl'].checked);
       const p2 = env2.win._preferencesPayloadFromUi();
       const legacyLocalOnPayload = p2.rtl === true && p2.rtl_mode === 'on';
 
       // 3. Server {language:'en', rtl:true}, no mode, fresh browser -> Settings shows ON, persists rtl:true, rtl_mode:'on'
       const env3 = setupEnvironment({}, { rtl: true, language: 'en' });
       await env3.win.loadSettingsPanel();
-      const legacyServerOnShowsOn = env3.classes.has('chat-content-rtl') && env3.elements['settingsRtl'].checked;
+      const legacyServerOnShowsOn = env3.classes.has('chat-content-rtl') && (env3.elements['settingsRtl'].value === 'on' || env3.elements['settingsRtl'].checked);
       const p3 = env3.win._preferencesPayloadFromUi();
       const legacyServerOnPayload = p3.rtl === true && p3.rtl_mode === 'on';
       await env3.win.saveSettings();
@@ -537,54 +552,56 @@ def test_composed_hydration_language_payload_coherence():
       const env4 = setupEnvironment({}, { rtl_mode: 'auto', rtl: false, language: 'fa' });
       await env4.win.loadSettingsPanel();
       env4.setStorageThrows(true);
+      env4.elements['settingsRtl'].value = 'off';
       env4.elements['settingsRtl'].checked = false;
       env4.listeners['settingsRtl:change']();
       await env4.win.saveSettings();
-      const storageThrowsManualOffStaysOff = !env4.classes.has('chat-content-rtl') && !env4.elements['settingsRtl'].checked;
+      const storageThrowsManualOffStaysOff = !env4.classes.has('chat-content-rtl') && env4.elements['settingsRtl'].value === 'off';
 
       // 5. Storage throws on manual on (en) -> explicit saveSettings preserves live intent ON
       const env5 = setupEnvironment({}, { rtl_mode: 'auto', rtl: false, language: 'en' });
       await env5.win.loadSettingsPanel();
       env5.setStorageThrows(true);
+      env5.elements['settingsRtl'].value = 'on';
       env5.elements['settingsRtl'].checked = true;
       env5.listeners['settingsRtl:change']();
       await env5.win.saveSettings();
-      const storageThrowsManualOnStaysOn = env5.classes.has('chat-content-rtl') && env5.elements['settingsRtl'].checked;
+      const storageThrowsManualOnStaysOn = env5.classes.has('chat-content-rtl') && env5.elements['settingsRtl'].value === 'on';
 
-      // 6. Default auto: fresh fa -> Settings shows ON, payload retains auto -> change to en live -> ends OFF
+      // 6. Default auto: fresh fa -> Settings shows ON/auto, payload retains auto -> change to en live -> ends OFF
       const env6 = setupEnvironment({}, { rtl_mode: 'auto', rtl: false, language: 'fa' });
       await env6.win.loadSettingsPanel();
-      const autoFaShowsOn = env6.classes.has('chat-content-rtl') && env6.elements['settingsRtl'].checked;
+      const autoFaShowsOn = env6.classes.has('chat-content-rtl') && (env6.elements['settingsRtl'].value === 'auto' || env6.elements['settingsRtl'].checked);
       const p6 = env6.win._preferencesPayloadFromUi();
       const autoRetainedInPayload = p6.rtl_mode === 'auto';
       env6.elements['settingsLanguage'].value = 'en';
       env6.listeners['settingsLanguage:change'].call(env6.elements['settingsLanguage']);
-      const autoSwitchToEnEndsOff = !env6.classes.has('chat-content-rtl') && !env6.elements['settingsRtl'].checked;
+      const autoSwitchToEnEndsOff = !env6.classes.has('chat-content-rtl') && env6.elements['settingsRtl'].value === 'auto';
 
       // 7. Fresh-browser manual on/off persisted
       const env7 = setupEnvironment({}, { rtl_mode: 'on', rtl: true, language: 'en' });
       await env7.win.loadSettingsPanel();
-      const freshManualOn = env7.classes.has('chat-content-rtl') && env7.elements['settingsRtl'].checked;
+      const freshManualOn = env7.classes.has('chat-content-rtl') && (env7.elements['settingsRtl'].value === 'on' || env7.elements['settingsRtl'].checked);
 
       const env7b = setupEnvironment({}, { rtl_mode: 'off', rtl: false, language: 'fa' });
       await env7b.win.loadSettingsPanel();
-      const freshManualOff = !env7b.classes.has('chat-content-rtl') && !env7b.elements['settingsRtl'].checked;
+      const freshManualOff = !env7b.classes.has('chat-content-rtl') && (env7b.elements['settingsRtl'].value === 'off' || !env7b.elements['settingsRtl'].checked);
 
       // 8. Server mode outranks local storage:
       // Server on outranks local off
       const env8a = setupEnvironment({ 'hermes-rtl-mode': 'off' }, { rtl_mode: 'on', rtl: true, language: 'fa' });
       await env8a.win.loadSettingsPanel();
-      const serverOnWinsLocalOff = env8a.classes.has('chat-content-rtl') && env8a.elements['settingsRtl'].checked;
+      const serverOnWinsLocalOff = env8a.classes.has('chat-content-rtl') && (env8a.elements['settingsRtl'].value === 'on' || env8a.elements['settingsRtl'].checked);
 
       // Server off outranks local on
       const env8b = setupEnvironment({ 'hermes-rtl-mode': 'on' }, { rtl_mode: 'off', rtl: false, language: 'en' });
       await env8b.win.loadSettingsPanel();
-      const serverOffWinsLocalOn = !env8b.classes.has('chat-content-rtl') && !env8b.elements['settingsRtl'].checked;
+      const serverOffWinsLocalOn = !env8b.classes.has('chat-content-rtl') && (env8b.elements['settingsRtl'].value === 'off' || !env8b.elements['settingsRtl'].checked);
 
       // Server auto outranks local off for fa (auto means RTL for fa)
       const env8c = setupEnvironment({ 'hermes-rtl-mode': 'off' }, { rtl_mode: 'auto', rtl: false, language: 'fa' });
       await env8c.win.loadSettingsPanel();
-      const serverAutoWinsLocalOffForFa = env8c.classes.has('chat-content-rtl') && env8c.elements['settingsRtl'].checked;
+      const serverAutoWinsLocalOffForFa = env8c.classes.has('chat-content-rtl') && (env8c.elements['settingsRtl'].value === 'auto' || env8c.elements['settingsRtl'].checked);
 
       // 9. Both save paths (saveSettings & autosave) persist correct values
       const env9 = setupEnvironment({}, { rtl_mode: 'auto', rtl: false, language: 'fa' });
@@ -592,6 +609,7 @@ def test_composed_hydration_language_payload_coherence():
       await env9.win.saveSettings();
       const explicitSavePersisted = env9.getLastSavedPayload().rtl_mode === 'auto';
 
+      env9.elements['settingsRtl'].value = 'off';
       env9.elements['settingsRtl'].checked = false;
       env9.listeners['settingsRtl:change']();
       await env9.win._autosavePreferencesSettings(env9.win._preferencesPayloadFromUi());

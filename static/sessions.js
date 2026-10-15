@@ -8208,6 +8208,7 @@ function renderSessionListFromCache(){
     }
     const title=document.createElement('span');
     title.className='session-title';
+    title.dir='auto';  // mixed Persian/English titles keep their reading order (#7699)
     const displayTitle=cleanTitle||'Untitled';
     const titleMatched=Boolean(searchQueryRaw&&displayTitle.toLowerCase().includes(searchQueryRaw.toLowerCase()));
     if(titleMatched) _appendHighlightedText(title,displayTitle,searchQueryRaw,'session-search-hit');

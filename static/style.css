@@ -19,7 +19,7 @@
   font-style: normal;
   font-display: swap;
 }
-:root:lang(fa), :root[data-locale="fa"], html[lang^="fa"] {
+html:root:lang(fa), html:root[data-locale="fa"], html:root[lang^="fa"] {
   --font-ui: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-conversation: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -1684,7 +1684,7 @@ html[lang^="fa"] body {
   .session-item.streaming .session-title-row{color:var(--text);}
   .session-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow:hidden;}
   .session-title-row{display:flex;align-items:center;gap:6px;min-width:0;}
-  .session-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);user-select:none;}
+  .session-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);user-select:none;text-align:left;}
   .session-search-hit{border-radius:4px;background:var(--accent-bg);color:var(--accent-text);box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:0 .08em;}
   .session-search-preview{font-size:11px;line-height:1.35;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;opacity:.9;}
   .session-search-hit-preview{background:var(--accent-bg);color:var(--accent-text);}
@@ -2338,7 +2338,7 @@ html[lang^="fa"] body {
   .msg-body{font-family:var(--font-conversation);font-size:var(--message-body-font-size);line-height:var(--message-body-line-height);color:var(--text);padding-left:30px;max-width:680px;overflow-wrap:anywhere;}
   .msg-body p{margin-bottom:10px;}.msg-body p:last-child{margin-bottom:0;}
   .msg-body td p,.msg-body th p{margin:0;}
-  .msg-body ul,.msg-body ol{margin:6px 0 10px 20px;}.msg-body li{margin-bottom:3px;}
+  .msg-body ul,.msg-body ol{margin:6px 0 10px 0;margin-inline-start:20px;}.msg-body li{margin-bottom:3px;}
   .msg-body h1,.msg-body h2,.msg-body h3,.msg-body h4,.msg-body h5,.msg-body h6{font-weight:700;color:var(--strong,var(--text));line-height:1.3;}
   .msg-body h1{font-size:24px;margin:24px 0 12px;border-bottom:1px solid var(--border);padding-bottom:6px;}
   .msg-body h2{font-size:20px;margin:22px 0 10px;border-bottom:1px solid var(--border);padding-bottom:4px;}
@@ -2438,7 +2438,7 @@ html[lang^="fa"] body {
   .tree-null{color:var(--muted);font-style:italic;}
   .tree-comma{color:var(--muted);}
   .tree-item{line-height:1.6;}
-  .msg-body blockquote{border-left:3px solid var(--blue);padding-left:14px;color:var(--muted);font-style:italic;margin:10px 0;}
+  .msg-body blockquote{border-inline-start:3px solid var(--blue);padding-inline-start:14px;color:var(--muted);font-style:italic;margin:10px 0;}
   .msg-body blockquote p{margin:0;}
   .msg-body a{color:var(--blue);text-decoration:underline;}
   .msg-body hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
@@ -7187,6 +7187,8 @@ main.main.showing-logs > #mainLogs{display:flex;}
  * code mirrored (e.g. `()fn()` instead of `fn()`) which is the salvage's
  * critical bug fix vs the original PR #1721 implementation.
  */
+/* The textarea's unicode-bidi:plaintext is not inherited by its placeholder (#7699 Fable r2). */
+.chat-content-rtl #msg::placeholder{unicode-bidi:plaintext;}
 .chat-content-rtl .msg-row{
   direction:rtl;
   text-align:right;

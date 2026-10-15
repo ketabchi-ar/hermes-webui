@@ -16,7 +16,7 @@ CONFIG = REPO_ROOT / "api" / "config.py"
 
 def test_rtl_settings_field_present_in_settings_panel():
     html = INDEX.read_text(encoding="utf-8")
-    assert 'id="settingsRtl"' in html, "Settings checkbox for RTL not found"
+    assert 'id="settingsRtl"' in html, "Settings control for RTL not found"
     assert 'data-i18n="settings_label_rtl"' in html
     assert 'data-i18n="settings_desc_rtl"' in html
 
