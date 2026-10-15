@@ -535,7 +535,7 @@ def test_composed_hydration_language_payload_coherence():
       // 2. Legacy local hermes-rtl='true' + language en -> RTL turns ON
       const env2 = setupEnvironment({ 'hermes-rtl': 'true' }, { language: 'en' });
       await env2.win.loadSettingsPanel();
-      const legacyLocalOnTurnsOn = env1.classes.has('chat-content-rtl') && (env2.elements['settingsRtl'].value === 'on' || env2.elements['settingsRtl'].checked);
+      const legacyLocalOnTurnsOn = env2.classes.has('chat-content-rtl') && (env2.elements['settingsRtl'].value === 'on' || env2.elements['settingsRtl'].checked);
       const p2 = env2.win._preferencesPayloadFromUi();
       const legacyLocalOnPayload = p2.rtl === true && p2.rtl_mode === 'on';
 
